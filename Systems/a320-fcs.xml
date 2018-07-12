@@ -1912,6 +1912,13 @@
 			<rate_limit>70</rate_limit>
 			<output>fcs/steer-pos-deg[0]</output>
 		</actuator>
+		
+		<switch name="fcs/pushback-steer-deg">
+			<default value="0"/>
+			<test value="fcs/steer-deg">
+				/sim/model/pushback/position-norm gt 0.999
+			</test>
+		</switch>
 	
 	</channel>
 	
@@ -1921,7 +1928,7 @@
 			<input>/controls/gear/brake-left</input>
 			<input>/controls/gear/brake-parking</input>
 			<clipto>
-				<min>-1</min>
+				<min>0</min>
 				<max>1</max>
 			</clipto>
 		</summer>
@@ -1938,7 +1945,7 @@
 			<input>/controls/gear/brake-right</input>
 			<input>/controls/gear/brake-parking</input>
 			<clipto>
-				<min>-1</min>
+				<min>0</min>
 				<max>1</max>
 			</clipto>
 		</summer>

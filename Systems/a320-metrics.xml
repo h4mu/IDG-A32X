@@ -1,0 +1,38 @@
+<!-- Airbus A320 JSBsim -->
+<!-- Joshua Davidson (it0uchpods) -->
+
+<!--
+##############################################
+# Copyright (c) Joshua Davidson (it0uchpods) #
+##############################################
+-->
+
+<metrics>
+	<htailarea unit="FT2">  334.24 </htailarea>
+	<htailarm  unit="FT" >   57.88 </htailarm>
+	<vtailarea unit="FT2">  248.79 </vtailarea>
+	<vtailarm  unit="FT" >   57.33 </vtailarm>
+	
+	<wingarea unit="M2">141.014</wingarea>
+	<wing_incidence unit="">0</wing_incidence>
+	<wingspan unit="M">37.059</wingspan>
+	<chord unit="">4.82</chord>
+	
+	<location unit="M" name="AERORP">
+		<x>16.1</x>
+		<y>0</y>
+		<z>0</z>
+	</location>
+	
+	<location name="EYEPOINT" unit="M">
+		<x> 0 </x>
+		<y> 0 </y>
+		<z> 0 </z>
+	</location>
+	
+	<location name="VRP" unit="M">
+		<x> 18.8499 </x>
+		<y> 0 </y>
+		<z> -1.7005004 </z>
+	</location>
+</metrics>

@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<!--
-##############################################
-# Copyright (c) Joshua Davidson (it0uchpods) #
-##############################################
--->
+<!-- Copyright (c) 2018 Joshua Davidson (it0uchpods) -->
 
 <PropertyList>
 
@@ -4461,10 +4457,30 @@
 		<object-name>StrobeLtSwtch</object-name>
 		<action>
 			<button>0</button>
+			<button>3</button>
 			<repeatable>false</repeatable>
 			<binding>
-				<command>property-toggle</command>
-				<property>controls/lighting/strobe</property>
+				<command>property-cycle</command>
+				<property>controls/switches/strobe</property>
+				<value>0.0</value>
+				<value>0.5</value>
+				<value>1.0</value>
+			</binding>
+			<binding>
+				<command>nasal</command>
+				<script>setprop("/sim/sounde/switch1", 1);</script>
+			</binding>
+		</action>
+		<action>
+			<button>1</button>
+			<button>4</button>
+			<repeatable>false</repeatable>
+			<binding>
+				<command>property-cycle</command>
+				<property>controls/switches/strobe</property>
+				<value>1.0</value>
+				<value>0.5</value>
+				<value>0.0</value>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -4472,14 +4488,16 @@
 			</binding>
 		</action>
 	</animation>
+	
 	<animation>
 		<name>Strobe lights rotate</name>
 		<type>rotate</type>
 		<object-name>StrobeLtSwtch</object-name>
-		<property>controls/lighting/strobe</property>
+		<property>controls/switches/strobe</property>
 		<interpolation>
-			<entry><ind>0</ind><dep>35</dep></entry>
-			<entry><ind>1</ind><dep>-35</dep></entry>
+			<entry><ind>0.0</ind><dep>35</dep></entry>
+			<entry><ind>0.5</ind><dep>0</dep></entry>
+			<entry><ind>1.0</ind><dep>-35</dep></entry>
 		</interpolation>
 		<axis>
 			<x>0</x>
@@ -5586,9 +5604,9 @@
 		<object-name>AnnunciatorLtSwtch</object-name>
 		<property>controls/switches/annun-test</property>
 		<interpolation>
-			<entry><ind>-1</ind><dep>35</dep></entry>
-			<entry><ind>0</ind><dep>0</dep></entry>
-			<entry><ind>1</ind><dep>-35</dep></entry>
+			<entry><ind>-1</ind><dep> 35</dep></entry>
+			<entry><ind> 0</ind><dep>  0</dep></entry>
+			<entry><ind> 1</ind><dep>-35</dep></entry>
 		</interpolation>
 		<axis>
 			<x>0</x>
@@ -5609,10 +5627,30 @@
 		<object-name>SeatBeltSwtch</object-name>
 		<action>
 			<button>0</button>
+			<button>3</button>
 			<repeatable>false</repeatable>
 			<binding>
-				<command>property-toggle</command>
+				<command>property-cycle</command>
 				<property>controls/switches/seatbelt-sign</property>
+				<value>0.0</value>
+				<!--value>0.5</value-->
+				<value>1.0</value>
+			</binding>
+			<binding>
+				<command>nasal</command>
+				<script>setprop("/sim/sounde/switch1", 1);</script>
+			</binding>
+		</action>
+		<action>
+			<button>1</button>
+			<button>4</button>
+			<repeatable>false</repeatable>
+			<binding>
+				<command>property-cycle</command>
+				<property>controls/switches/seatbelt-sign</property>
+				<value>1.0</value>
+				<!--value>0.5</value-->
+				<value>0.0</value>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -5627,8 +5665,9 @@
 		<object-name>SeatBeltSwtch</object-name>
 		<property>controls/switches/seatbelt-sign</property>
 		<interpolation>
-			<entry><ind>0</ind><dep>35</dep></entry>
-			<entry><ind>1</ind><dep>-35</dep></entry>
+			<entry><ind>0.0</ind><dep> 35</dep></entry>
+			<entry><ind>0.5</ind><dep>  0</dep></entry>
+			<entry><ind>1.0</ind><dep>-35</dep></entry>
 		</interpolation>
 		<axis>
 			<x>0</x>
@@ -5648,10 +5687,30 @@
 		<object-name>NoSmokingSwtch</object-name>
 		<action>
 			<button>0</button>
+			<button>3</button>
 			<repeatable>false</repeatable>
 			<binding>
-				<command>property-toggle</command>
+				<command>property-cycle</command>
 				<property>controls/switches/no-smoking-sign</property>
+				<value>0.0</value>
+				<value>0.5</value>
+				<value>1.0</value>
+			</binding>
+			<binding>
+				<command>nasal</command>
+				<script>setprop("/sim/sounde/switch1", 1);</script>
+			</binding>
+		</action>
+		<action>
+			<button>1</button>
+			<button>4</button>
+			<repeatable>false</repeatable>
+			<binding>
+				<command>property-cycle</command>
+				<property>controls/switches/no-smoking-sign</property>
+				<value>1.0</value>
+				<value>0.5</value>
+				<value>0.0</value>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -5665,8 +5724,9 @@
 		<object-name>NoSmokingSwtch</object-name>
 		<property>controls/switches/no-smoking-sign</property>
 		<interpolation>
-			<entry><ind>0</ind><dep>35</dep></entry>
-			<entry><ind>1</ind><dep>-35</dep></entry>
+			<entry><ind>0.0</ind><dep> 35</dep></entry>
+			<entry><ind>0.5</ind><dep>  0</dep></entry>
+			<entry><ind>1.0</ind><dep>-35</dep></entry>
 		</interpolation>
 		<axis>
 			<x>0</x>

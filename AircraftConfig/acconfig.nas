@@ -1,9 +1,7 @@
 # Aircraft Config Center
 # Joshua Davidson (it0uchpods)
 
-##############################################
-# Copyright (c) Joshua Davidson (it0uchpods) #
-##############################################
+# Copyright (c) 2018 Joshua Davidson (it0uchpods)
 
 var spinning = maketimer(0.05, func {
 	var spinning = getprop("/systems/acconfig/spinning");
@@ -423,6 +421,7 @@ var takeoff = func {
 			libraries.flaptimer.start();
 			setprop("/controls/flight/elevator-trim", -0.07);
 			systems.arm_autobrake(3);
+			libraries.ECAM.toConfig();
 		}
 	});
 }

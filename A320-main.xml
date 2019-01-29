@@ -215,13 +215,13 @@
 							<dialog-name>autopilot</dialog-name>
 						</binding>
 					</item>
-					<item>
+					<!--item>
 						<label>Route Manager</label>
 						<binding>
 							<command>dialog-show</command>
 							<dialog-name>route-manager</dialog-name>
 						</binding>
-					</item>
+					</item-->
 				</menu>
 				<menu n="103">
 					<label>DU</label>
@@ -1510,6 +1510,7 @@
 			<file>Aircraft/IDG-A32X/Nasal/it-fbw.nas</file>
 		</fbw>
 		<fmgc>
+			<file>Aircraft/IDG-A32X/Nasal/flightplan.nas</file>
 			<file>Aircraft/IDG-A32X/Nasal/FMGC.nas</file>
 			<file>Aircraft/IDG-A32X/Nasal/FMGC-b.nas</file>
 			<file>Aircraft/IDG-A32X/Nasal/FMGC-c.nas</file>

@@ -125,6 +125,9 @@ var flightplan = {
 				r1_currentWP_out.setValue(0);
 			}
 		}
+		
+		mcdu.updateFPLN(0);
+		mcdu.updateFPLN(1);
 	},
 };
 

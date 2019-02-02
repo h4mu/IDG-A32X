@@ -19,8 +19,24 @@ var ils = "";
 var adf1 = "";
 var adf2 = "";
 var engrdy = "";
+var flightNum = props.globals.initNode("/MCDUC/flight-num", "", "STRING");
+var flightNumSet = props.globals.initNode("/MCDUC/flight-num-set", 0, "BOOL");
+var fplnl1 = "";
+var fplnl1s = "";
+var fplnl2 = "";
+var fplnl2s = "";
+var fplnl3 = "";
+var fplnl3s = "";
+var fplnl4 = "";
+var fplnl4s = "";
+var fplnl5 = "";
+var fplnl5s = "";
+var fplnl6 = "";
+var fplnl6s = "";
 setprop("/MCDU[0]/internal/switch", 0);
+setprop("/MCDU[0]/internal/fpln-c-switch", 0);
 setprop("/MCDU[1]/internal/switch", 0);
+setprop("/MCDU[1]/internal/fpln-c-switch", 0);
 setprop("/MCDUC/colors/wht/r", 1);
 setprop("/MCDUC/colors/wht/g", 1);
 setprop("/MCDUC/colors/wht/b", 1);
@@ -86,7 +102,7 @@ var canvas_MCDU_base = {
 		"Simple_L1_Arrow","Simple_L2_Arrow","Simple_L3_Arrow","Simple_L4_Arrow","Simple_L5_Arrow","Simple_L6_Arrow","Simple_R1","Simple_R2","Simple_R3","Simple_R4","Simple_R5","Simple_R6","Simple_R1S","Simple_R2S","Simple_R3S","Simple_R4S","Simple_R5S",
 		"Simple_R6S","Simple_R1_Arrow","Simple_R2_Arrow","Simple_R3_Arrow","Simple_R4_Arrow","Simple_R5_Arrow","Simple_R6_Arrow","Simple_C1","Simple_C2","Simple_C3","Simple_C4","Simple_C5","Simple_C6","Simple_C1S","Simple_C2S","Simple_C3S","Simple_C4S",
 		"Simple_C5S","Simple_C6S","INITA","INITA_CoRoute","INITA_FltNbr","INITA_CostIndex","INITA_CruiseFLTemp","INITA_FromTo","INITA_InitRequest","INITA_AlignIRS","INITB","INITB_ZFWCG","INITB_ZFW","INITB_ZFW_S","INITB_Block","PERFTO","PERFTO_V1","PERFTO_VR",
-		"PERFTO_V2","PERFTO_FE","PERFTO_SE","PERFTO_OE"];
+		"PERFTO_V2","PERFTO_FE","PERFTO_SE","PERFTO_OE","FPLN","FPLN_From","FPLN_Callsign","FPLN_L1","FPLN_L2","FPLN_L3","FPLN_L4","FPLN_L5","FPLN_L6","FPLN_L1S","FPLN_L2S","FPLN_L3S","FPLN_L4S","FPLN_L5S","FPLN_L6S"];
 	},
 	update: func() {
 		if (getprop("/systems/electrical/bus/ac1") >= 110 and getprop("/controls/lighting/DU/mcdu1") > 0.01) {
@@ -104,10 +120,134 @@ var canvas_MCDU_base = {
 	},
 	updateCommon: func(i) {
 		page = getprop("/MCDU[" ~ i ~ "]/page");
-		if (page == "MCDU") {
+		if (page == "F-PLNA" or page == "F-PLNB") {
+			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
+				me["Simple"].hide();
+				me["Simple_Center"].hide();
+				me["FPLN"].show();
+				me["INITA"].hide();
+				me["INITB"].hide();
+				me["PERFTO"].hide();
+				me["Simple_PageNum"].hide();
+				me["ArrowLeft"].show();
+				me["ArrowRight"].show();
+				
+				setprop("/MCDU[" ~ i ~ "]/internal/switch", 1);
+			}
+			
+			if (flightNumSet.getBoolValue()) {
+				me["FPLN_Callsign"].setText(flightNum.getValue());
+				me["FPLN_Callsign"].show();
+			} else {
+				me["FPLN_Callsign"].hide();
+			}
+			
+			fplnl1 = getprop("/MCDU[" ~ i ~ "]/F-PLN/left-1");
+			if (fplnl1 != "") {
+				me["FPLN_L1"].setText(fplnl1);
+				me["FPLN_L1"].show();
+			} else {
+				me["FPLN_L1"].hide();
+			}
+			
+			fplnl2 = getprop("/MCDU[" ~ i ~ "]/F-PLN/left-2");
+			if (fplnl2 != "") {
+				me["FPLN_L2"].setText(fplnl2);
+				me["FPLN_L2"].show();
+			} else {
+				me["FPLN_L2"].hide();
+			}
+			
+			fplnl3 = getprop("/MCDU[" ~ i ~ "]/F-PLN/left-3");
+			if (fplnl3 != "") {
+				me["FPLN_L3"].setText(fplnl3);
+				me["FPLN_L3"].show();
+			} else {
+				me["FPLN_L3"].hide();
+			}
+			
+			fplnl4 = getprop("/MCDU[" ~ i ~ "]/F-PLN/left-4");
+			if (fplnl4 != "") {
+				me["FPLN_L4"].setText(fplnl4);
+				me["FPLN_L4"].show();
+			} else {
+				me["FPLN_L4"].hide();
+			}
+			
+			fplnl5 = getprop("/MCDU[" ~ i ~ "]/F-PLN/left-5");
+			if (fplnl5 != "") {
+				me["FPLN_L5"].setText(fplnl5);
+				me["FPLN_L5"].show();
+			} else {
+				me["FPLN_L5"].hide();
+			}
+			
+			fplnl6 = getprop("/MCDU[" ~ i ~ "]/F-PLN/left-6");
+			if (fplnl6 != "") {
+				me["FPLN_L6"].setText(fplnl6);
+				me["FPLN_L6"].show();
+			} else {
+				me["FPLN_L6"].hide();
+			}
+			
+			fplnl1s = getprop("/MCDU[" ~ i ~ "]/F-PLN/left-1s");
+			if (fplnl1s != "") {
+				me["FPLN_L1S"].setText(fplnl1s);
+				me["FPLN_L1S"].show();
+			} else {
+				me["FPLN_L1S"].hide();
+			}
+			
+			fplnl2s = getprop("/MCDU[" ~ i ~ "]/F-PLN/left-2s");
+			if (fplnl2s != "") {
+				me["FPLN_L2S"].setText(fplnl2s);
+				me["FPLN_L2S"].show();
+			} else {
+				me["FPLN_L2S"].hide();
+			}
+			
+			fplnl3s = getprop("/MCDU[" ~ i ~ "]/F-PLN/left-3s");
+			if (fplnl3s != "") {
+				me["FPLN_L3S"].setText(fplnl3s);
+				me["FPLN_L3S"].show();
+			} else {
+				me["FPLN_L3S"].hide();
+			}
+			
+			fplnl4s = getprop("/MCDU[" ~ i ~ "]/F-PLN/left-4s");
+			if (fplnl4s != "") {
+				me["FPLN_L4S"].setText(fplnl4s);
+				me["FPLN_L4S"].show();
+			} else {
+				me["FPLN_L4S"].hide();
+			}
+			
+			fplnl5s = getprop("/MCDU[" ~ i ~ "]/F-PLN/left-5s");
+			if (fplnl5s != "") {
+				me["FPLN_L5S"].setText(fplnl5s);
+				me["FPLN_L5S"].show();
+			} else {
+				me["FPLN_L5S"].hide();
+			}
+			
+			fplnl6s = getprop("/MCDU[" ~ i ~ "]/F-PLN/left-6s");
+			if (fplnl6s != "") {
+				me["FPLN_L6S"].setText(fplnl6s);
+				me["FPLN_L6S"].show();
+			} else {
+				me["FPLN_L6S"].hide();
+			}
+			
+			if (getprop("/MCDU[" ~ i ~ "]/internal/fpln-c-switch") != 1) {
+				me.FPLNcolor(getprop("/MCDU[" ~ i ~ "]/F-PLN/line-1c"), getprop("/MCDU[" ~ i ~ "]/F-PLN/line-2c"), getprop("/MCDU[" ~ i ~ "]/F-PLN/line-3c"), getprop("/MCDU[" ~ i ~ "]/F-PLN/line-4c"), getprop("/MCDU[" ~ i ~ "]/F-PLN/line-5c"), getprop("/MCDU[" ~ i ~ "]/F-PLN/line-6c"));
+				print("FPLN color updated");
+				setprop("/MCDU[" ~ i ~ "]/internal/fpln-c-switch", 1);
+			}
+		} else if (page == "MCDU") {
 			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
 				me["Simple"].show();
 				me["Simple_Center"].hide();
+				me["FPLN"].hide();
 				me["INITA"].hide();
 				me["INITB"].hide();
 				me["PERFTO"].hide();
@@ -189,6 +329,7 @@ var canvas_MCDU_base = {
 			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
 				me["Simple"].show();
 				me["Simple_Center"].hide();
+				me["FPLN"].hide();
 				me["INITA"].hide();
 				me["INITB"].hide();
 				me["PERFTO"].hide();
@@ -270,6 +411,7 @@ var canvas_MCDU_base = {
 			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
 				me["Simple"].show();
 				me["Simple_Center"].hide();
+				me["FPLN"].hide();
 				me["INITA"].hide();
 				me["INITB"].hide();
 				me["PERFTO"].hide();
@@ -349,6 +491,7 @@ var canvas_MCDU_base = {
 			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
 				me["Simple"].show();
 				me["Simple_Center"].hide();
+				me["FPLN"].hide();
 				me["INITA"].hide();
 				me["INITB"].hide();
 				me["PERFTO"].hide();
@@ -433,6 +576,7 @@ var canvas_MCDU_base = {
 			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
 				me["Simple"].show();
 				me["Simple_Center"].show();
+				me["FPLN"].hide();
 				me["INITA"].hide();
 				me["INITB"].hide();
 				me["PERFTO"].hide();
@@ -529,6 +673,7 @@ var canvas_MCDU_base = {
 			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
 				me["Simple"].show();
 				me["Simple_Center"].hide();
+				me["FPLN"].hide();
 				me["INITA"].hide();
 				me["INITB"].hide();
 				me["PERFTO"].hide();
@@ -673,6 +818,7 @@ var canvas_MCDU_base = {
 			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
 				me["Simple"].show();
 				me["Simple_Center"].hide();
+				me["FPLN"].hide();
 				me["INITA"].show();
 				me["INITB"].hide();
 				me["PERFTO"].hide();
@@ -821,6 +967,7 @@ var canvas_MCDU_base = {
 			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
 				me["Simple"].show();
 				me["Simple_Center"].show();
+				me["FPLN"].hide();
 				me["INITA"].hide();
 				me["INITB"].show();
 				me["PERFTO"].hide();
@@ -950,6 +1097,7 @@ var canvas_MCDU_base = {
 			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
 				me["Simple"].show();
 				me["Simple_Center"].show();
+				me["FPLN"].hide();
 				me["INITA"].hide();
 				me["INITB"].hide();
 				me["PERFTO"].hide();
@@ -1064,6 +1212,7 @@ var canvas_MCDU_base = {
 			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
 				me["Simple"].show();
 				me["Simple_Center"].show();
+				me["FPLN"].hide();
 				me["INITA"].hide();
 				me["INITB"].hide();
 				me["PERFTO"].show();
@@ -1221,6 +1370,7 @@ var canvas_MCDU_base = {
 			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
 				me["Simple"].show();
 				me["Simple_Center"].show();
+				me["FPLN"].hide();
 				me["INITA"].hide();
 				me["INITB"].hide();
 				me["PERFTO"].hide();
@@ -1341,6 +1491,7 @@ var canvas_MCDU_base = {
 		} else {
 			if (getprop("/MCDU[" ~ i ~ "]/internal/switch") != 1) {
 				me["Simple"].hide();
+				me["FPLN"].hide();
 				me["INITA"].hide();
 				me["INITB"].hide();
 				me["PERFTO"].hide();
@@ -1513,6 +1664,20 @@ var canvas_MCDU_base = {
 		if (f != "ack") {
 			me["Simple_C6S"].setColor(getprop("/MCDUC/colors/" ~ f ~ "/r"), getprop("/MCDUC/colors/" ~ f ~ "/g"), getprop("/MCDUC/colors/" ~ f ~ "/b"));
 		}
+	},
+	FPLNcolor: func(a, b, c, d, e, f) {
+		me["FPLN_L1"].setColor(getprop("/MCDUC/colors/" ~ a ~ "/r"), getprop("/MCDUC/colors/" ~ a ~ "/g"), getprop("/MCDUC/colors/" ~ a ~ "/b"));
+		me["FPLN_L1S"].setColor(getprop("/MCDUC/colors/" ~ a ~ "/r"), getprop("/MCDUC/colors/" ~ a ~ "/g"), getprop("/MCDUC/colors/" ~ a ~ "/b"));
+		me["FPLN_L2"].setColor(getprop("/MCDUC/colors/" ~ b ~ "/r"), getprop("/MCDUC/colors/" ~ b ~ "/g"), getprop("/MCDUC/colors/" ~ b ~ "/b"));
+		me["FPLN_L2S"].setColor(getprop("/MCDUC/colors/" ~ b ~ "/r"), getprop("/MCDUC/colors/" ~ b ~ "/g"), getprop("/MCDUC/colors/" ~ b ~ "/b"));
+		me["FPLN_L3"].setColor(getprop("/MCDUC/colors/" ~ c ~ "/r"), getprop("/MCDUC/colors/" ~ c ~ "/g"), getprop("/MCDUC/colors/" ~ c ~ "/b"));
+		me["FPLN_L3S"].setColor(getprop("/MCDUC/colors/" ~ c ~ "/r"), getprop("/MCDUC/colors/" ~ c ~ "/g"), getprop("/MCDUC/colors/" ~ c ~ "/b"));
+		me["FPLN_L4"].setColor(getprop("/MCDUC/colors/" ~ d ~ "/r"), getprop("/MCDUC/colors/" ~ d ~ "/g"), getprop("/MCDUC/colors/" ~ d ~ "/b"));
+		me["FPLN_L4S"].setColor(getprop("/MCDUC/colors/" ~ d ~ "/r"), getprop("/MCDUC/colors/" ~ d ~ "/g"), getprop("/MCDUC/colors/" ~ d ~ "/b"));
+		me["FPLN_L5"].setColor(getprop("/MCDUC/colors/" ~ e ~ "/r"), getprop("/MCDUC/colors/" ~ e ~ "/g"), getprop("/MCDUC/colors/" ~ e ~ "/b"));
+		me["FPLN_L5S"].setColor(getprop("/MCDUC/colors/" ~ e ~ "/r"), getprop("/MCDUC/colors/" ~ e ~ "/g"), getprop("/MCDUC/colors/" ~ e ~ "/b"));
+		me["FPLN_L6"].setColor(getprop("/MCDUC/colors/" ~ f ~ "/r"), getprop("/MCDUC/colors/" ~ f ~ "/g"), getprop("/MCDUC/colors/" ~ f ~ "/b"));
+		me["FPLN_L6S"].setColor(getprop("/MCDUC/colors/" ~ f ~ "/r"), getprop("/MCDUC/colors/" ~ f ~ "/g"), getprop("/MCDUC/colors/" ~ f ~ "/b"));
 	},
 	# 0 = ignore
 	fontLeft: func (a, b, c, d, e, f) {
@@ -1719,8 +1884,48 @@ var showMCDU2 = func {
 
 setlistener("/MCDU[0]/page", func {
 	setprop("/MCDU[0]/internal/switch", 0);
+	setprop("/MCDU[0]/internal/fpln-c-switch", 0);
+
 }, 0, 0);
 
 setlistener("/MCDU[1]/page", func {
 	setprop("/MCDU[1]/internal/switch", 0);
+	setprop("/MCDU[1]/internal/fpln-c-switch", 0);
+
+}, 0, 0);
+
+setlistener("/MCDU[0]/F-PLN/line-1c", func {
+	if (getprop("/MCDU[0]/page") == "F-PLNA" or getprop("/MCDU[0]/page") == "F-PLNB") {
+		setprop("/MCDU[0]/internal/fpln-c-switch", 0);
+	}
+}, 0, 0);
+
+setlistener("/MCDU[0]/F-PLN/line-2c", func {
+	if (getprop("/MCDU[0]/page") == "F-PLNA" or getprop("/MCDU[0]/page") == "F-PLNB") {
+		setprop("/MCDU[0]/internal/fpln-c-switch", 0);
+	}
+}, 0, 0);
+
+setlistener("/MCDU[0]/F-PLN/line-3c", func {
+	if (getprop("/MCDU[0]/page") == "F-PLNA" or getprop("/MCDU[0]/page") == "F-PLNB") {
+		setprop("/MCDU[0]/internal/fpln-c-switch", 0);
+	}
+}, 0, 0);
+
+setlistener("/MCDU[0]/F-PLN/line-4c", func {
+	if (getprop("/MCDU[0]/page") == "F-PLNA" or getprop("/MCDU[0]/page") == "F-PLNB") {
+		setprop("/MCDU[0]/internal/fpln-c-switch", 0);
+	}
+}, 0, 0);
+
+setlistener("/MCDU[0]/F-PLN/line-5c", func {
+	if (getprop("/MCDU[0]/page") == "F-PLNA" or getprop("/MCDU[0]/page") == "F-PLNB") {
+		setprop("/MCDU[0]/internal/fpln-c-switch", 0);
+	}
+}, 0, 0);
+
+setlistener("/MCDU[0]/F-PLN/line-6c", func {
+	if (getprop("/MCDU[0]/page") == "F-PLNA" or getprop("/MCDU[0]/page") == "F-PLNB") {
+		setprop("/MCDU[0]/internal/fpln-c-switch", 0);
+	}
 }, 0, 0);

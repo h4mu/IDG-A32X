@@ -14,6 +14,10 @@ var r1_currentWP = 0;
 var r1_currentLeg = nil;
 var r1_currentLegCourseDist = 0;
 var geoPos = nil;
+var geoPosPrev = geo.Coord.new();
+var courseDistanceFrom = nil;
+var courseDistanceFromPrev = nil;
+var altFeet = props.globals.getNode("/instrumentation/altimeter/indicated-altitude-ft", 1);
 var r1_active_out = props.globals.initNode("/FMGC/flightplan/r1/active", 0, "BOOL");
 var r1_currentWP_out = props.globals.initNode("/FMGC/flightplan/r1/current-wp", 0, "INT");
 var r1_currentLeg_out = props.globals.initNode("/FMGC/flightplan/r1/current-leg", "", "STRING");
@@ -99,8 +103,18 @@ var flightplan = {
 			
 			for (var i = 0; i < r1.getPlanSize(); i += 1) {
 				setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/id", r1.getWP(i).wp_name);
-				setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/course", r1.getWP(i).courseAndDistanceFrom(geoPos)[0]);
-				setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/distance", r1.getWP(i).courseAndDistanceFrom(geoPos)[1]);
+				courseDistanceFrom = r1.getWP(i).courseAndDistanceFrom(geoPos);
+				setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/course", courseDistanceFrom[0]);
+				setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/distance", courseDistanceFrom[1]);
+				if (i > 0) { # Impossible to do from the first WP
+					geoPosPrev.set_latlon(r1.getWP(i - 1).lat, r1.getWP(i - 1).lon, altFeet.getValue() * 0.3048);
+					courseDistanceFromPrev = r1.getWP(i).courseAndDistanceFrom(geoPosPrev);
+					setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/course-from-prev", courseDistanceFromPrev[0]);
+					setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/distance-from-prev", courseDistanceFromPrev[1]);
+				} else { # So if its the first WP, we just use current position instead
+					setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/course-from-prev", courseDistanceFrom[0]);
+					setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/distance-from-prev", courseDistanceFrom[1]);
+				}
 			}
 		} else {
 			if (r1_active_out.getBoolValue() != 0) {

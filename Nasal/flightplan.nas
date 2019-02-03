@@ -17,6 +17,7 @@ var geoPos = nil;
 var geoPosPrev = geo.Coord.new();
 var courseDistanceFrom = nil;
 var courseDistanceFromPrev = nil;
+var sizeWP = nil;
 var altFeet = props.globals.getNode("/instrumentation/altimeter/indicated-altitude-ft", 1);
 var r1_active_out = props.globals.initNode("/FMGC/flightplan/r1/active", 0, "BOOL");
 var r1_currentWP_out = props.globals.initNode("/FMGC/flightplan/r1/current-wp", 0, "INT");
@@ -26,14 +27,17 @@ var r1_currentLegDist_out = props.globals.initNode("/FMGC/flightplan/r1/current-
 var r1_num_out = props.globals.initNode("/FMGC/flightplan/r1/num", 0, "INT");
 var toFromSet = props.globals.initNode("/FMGC/internal/tofrom-set", 0, "BOOL");
 
+# props.nas for flightplan
+var wpID = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/id", "", "STRING")];
+var wpCourse = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/course", 0, "DOUBLE")];
+var wpDistance = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/distance", 0, "DOUBLE")];
+var wpCoursePrev = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/course-from-prev", 0, "DOUBLE")];
+var wpDistancePrev = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/distance-from-prev", 0, "DOUBLE")];
+
 var flightplan = {
-	initProps: func() {
-		
-	},
 	reset: func() {
 #		me.reset0();
 		me.reset1();
-		me.initProps();
 	},
 	reset1: func() {
 		r1.cleanPlan();
@@ -62,18 +66,32 @@ var flightplan = {
 			} else {
 				r1.destination = nil;
 			}
+			
+			me.checkWPOutputs();
 		}
 	},
 	insertFix: func(wp, i) {
 		var pos = findFixesByID(wp);
 		if (pos != nil and size(pos) > 0) {
 			r1.insertWP(createWPFrom(pos[0]), i);
+			me.checkWPOutputs();
 		}
 	},
 	insertNavaid: func(nav, i) {
 		var pos = findNavaidsByID(nav);
 		if (pos != nil and size(pos) > 0) {
 			r1.insertWP(createWPFrom(pos[0]), i);
+			me.checkWPOutputs();
+		}
+	},
+	checkWPOutputs: func() {
+		sizeWP = size(wpID);
+		for (var counter = sizeWP; counter < r1.getPlanSize(); counter += 1) {
+			append(wpID, props.globals.initNode("/FMGC/flightplan/r1/wp[" ~ counter ~ "]/id", "", "STRING"));
+			append(wpCourse, props.globals.initNode("/FMGC/flightplan/r1/wp[" ~ counter ~ "]/course", 0, "DOUBLE"));
+			append(wpDistance, props.globals.initNode("/FMGC/flightplan/r1/wp[" ~ counter ~ "]/distance", 0, "DOUBLE"));
+			append(wpCoursePrev, props.globals.initNode("/FMGC/flightplan/r1/wp[" ~ counter ~ "]/course-from-prev", 0, "DOUBLE"));
+			append(wpDistancePrev, props.globals.initNode("/FMGC/flightplan/r1/wp[" ~ counter ~ "]/distance-from-prev", 0, "DOUBLE"));
 		}
 	},
 	outputProps: func() {
@@ -102,18 +120,18 @@ var flightplan = {
 			r1_currentLegDist_out.setValue(r1_currentLegCourseDist[1]);
 			
 			for (var i = 0; i < r1.getPlanSize(); i += 1) {
-				setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/id", r1.getWP(i).wp_name);
+				wpID[i].setValue(r1.getWP(i).wp_name);
 				courseDistanceFrom = r1.getWP(i).courseAndDistanceFrom(geoPos);
-				setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/course", courseDistanceFrom[0]);
-				setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/distance", courseDistanceFrom[1]);
+				wpCourse[i].setValue(courseDistanceFrom[0]);
+				wpDistance[i].setValue(courseDistanceFrom[1]);
 				if (i > 0) { # Impossible to do from the first WP
 					geoPosPrev.set_latlon(r1.getWP(i - 1).lat, r1.getWP(i - 1).lon, altFeet.getValue() * 0.3048);
 					courseDistanceFromPrev = r1.getWP(i).courseAndDistanceFrom(geoPosPrev);
-					setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/course-from-prev", courseDistanceFromPrev[0]);
-					setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/distance-from-prev", courseDistanceFromPrev[1]);
+					wpCoursePrev[i].setValue(courseDistanceFromPrev[0]);
+					wpDistancePrev[i].setValue(courseDistanceFromPrev[1]);
 				} else { # So if its the first WP, we just use current position instead
-					setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/course-from-prev", courseDistanceFrom[0]);
-					setprop("/FMGC/flightplan/r1/wp[" ~ i ~ "]/distance-from-prev", courseDistanceFrom[1]);
+					wpCoursePrev[i].setValue(courseDistanceFrom[0]);
+					wpDistancePrev[i].setValue(courseDistanceFrom[1]);
 				}
 			}
 		} else {
@@ -145,5 +163,4 @@ var flightplan = {
 	},
 };
 
-flightplan.initProps();
 var outputPropsTimer = maketimer(0.4, flightplan.outputProps);

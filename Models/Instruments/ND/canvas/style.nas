@@ -759,7 +759,11 @@ canvas.NDStyles["Airbus"] = {
 						nd.in_mode("toggle_display_mode", ["MAP", "PLAN"]),
 				is_true: func(nd) {
 					#var cur_wp = getprop("autopilot/route-manager/current-wp");
-					var deg = int(getprop("/FMGC/flightplan/r1/current-leg-course"));
+					if (nd.get_switch("toggle_true_north")) {
+						var deg = math.round(getprop("/FMGC/flightplan/r1/current-leg-course"));
+					} else {
+						var deg = math.round(getprop("/FMGC/flightplan/r1/current-leg-course-mag"));
+					}
 					nd.symbols.wpActiveCrs.setText((deg or "")~"°");
 					nd.symbols.wpActiveCrs.show();
 				},

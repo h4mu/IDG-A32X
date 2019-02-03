@@ -18,14 +18,18 @@ var geoPosPrev = geo.Coord.new();
 var courseDistanceFrom = nil;
 var courseDistanceFromPrev = nil;
 var sizeWP = nil;
+var magTrueError = 0;
 var altFeet = props.globals.getNode("/instrumentation/altimeter/indicated-altitude-ft", 1);
 var r1_active_out = props.globals.initNode("/FMGC/flightplan/r1/active", 0, "BOOL");
 var r1_currentWP_out = props.globals.initNode("/FMGC/flightplan/r1/current-wp", 0, "INT");
 var r1_currentLeg_out = props.globals.initNode("/FMGC/flightplan/r1/current-leg", "", "STRING");
 var r1_currentLegCourse_out = props.globals.initNode("/FMGC/flightplan/r1/current-leg-course", 0, "DOUBLE");
 var r1_currentLegDist_out = props.globals.initNode("/FMGC/flightplan/r1/current-leg-dist", 0, "DOUBLE");
+var r1_currentLegCourseMag_out = props.globals.initNode("/FMGC/flightplan/r1/current-leg-course-mag", 0, "DOUBLE");
 var r1_num_out = props.globals.initNode("/FMGC/flightplan/r1/num", 0, "INT");
 var toFromSet = props.globals.initNode("/FMGC/internal/tofrom-set", 0, "BOOL");
+var magHDG = props.globals.getNode("/orientation/heading-magnetic-deg", 1);
+var trueHDG = props.globals.getNode("/orientation/heading-deg", 1);
 
 # props.nas for flightplan
 var wpID = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/id", "", "STRING")];
@@ -84,7 +88,12 @@ var flightplan = {
 			me.checkWPOutputs();
 		}
 	},
+	deleteWP: func(i) {
+		r1.deleteWP(i);
+		canvas_nd.A3XXRouteDriver.triggerSignal("fp-removed");
+	},
 	checkWPOutputs: func() {
+		canvas_nd.A3XXRouteDriver.triggerSignal("fp-added");
 		sizeWP = size(wpID);
 		for (var counter = sizeWP; counter < r1.getPlanSize(); counter += 1) {
 			append(wpID, props.globals.initNode("/FMGC/flightplan/r1/wp[" ~ counter ~ "]/id", "", "STRING"));
@@ -118,6 +127,9 @@ var flightplan = {
 			r1_currentLegCourseDist = r1.getWP(r1_currentWP).courseAndDistanceFrom(geoPos);
 			r1_currentLegCourse_out.setValue(r1_currentLegCourseDist[0]);
 			r1_currentLegDist_out.setValue(r1_currentLegCourseDist[1]);
+			
+			magTrueError = magHDG.getValue() - trueHDG.getValue();
+			r1_currentLegCourseMag_out.setValue(r1_currentLegCourseDist[0] + magTrueError); # Convert to Magnetic
 			
 			for (var i = 0; i < r1.getPlanSize(); i += 1) {
 				wpID[i].setValue(r1.getWP(i).wp_name);

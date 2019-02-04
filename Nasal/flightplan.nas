@@ -33,6 +33,8 @@ var trueHDG = props.globals.getNode("/orientation/heading-deg", 1);
 
 # props.nas for flightplan
 var wpID = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/id", "", "STRING")];
+var wpLat = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/lat", 0, "DOUBLE")];
+var wpLon = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/lon", 0, "DOUBLE")];
 var wpCourse = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/course", 0, "DOUBLE")];
 var wpDistance = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/distance", 0, "DOUBLE")];
 var wpCoursePrev = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/course-from-prev", 0, "DOUBLE")];
@@ -89,14 +91,18 @@ var flightplan = {
 		}
 	},
 	deleteWP: func(i) {
-		r1.deleteWP(i);
-		canvas_nd.A3XXRouteDriver.triggerSignal("fp-removed");
+		if (r1.getPlanSize() > 2) {
+			r1.deleteWP(i);
+			canvas_nd.A3XXRouteDriver.triggerSignal("fp-removed");
+		}
 	},
 	checkWPOutputs: func() {
 		canvas_nd.A3XXRouteDriver.triggerSignal("fp-added");
 		sizeWP = size(wpID);
 		for (var counter = sizeWP; counter < r1.getPlanSize(); counter += 1) {
 			append(wpID, props.globals.initNode("/FMGC/flightplan/r1/wp[" ~ counter ~ "]/id", "", "STRING"));
+			append(wpLat, props.globals.initNode("/FMGC/flightplan/r1/wp[" ~ counter ~ "]/lat", 0, "DOUBLE"));
+			append(wpLon, props.globals.initNode("/FMGC/flightplan/r1/wp[" ~ counter ~ "]/lon", 0, "DOUBLE"));
 			append(wpCourse, props.globals.initNode("/FMGC/flightplan/r1/wp[" ~ counter ~ "]/course", 0, "DOUBLE"));
 			append(wpDistance, props.globals.initNode("/FMGC/flightplan/r1/wp[" ~ counter ~ "]/distance", 0, "DOUBLE"));
 			append(wpCoursePrev, props.globals.initNode("/FMGC/flightplan/r1/wp[" ~ counter ~ "]/course-from-prev", 0, "DOUBLE"));
@@ -133,6 +139,8 @@ var flightplan = {
 			
 			for (var i = 0; i < r1.getPlanSize(); i += 1) {
 				wpID[i].setValue(r1.getWP(i).wp_name);
+				wpLat[i].setValue(r1.getWP(i).wp_lat);
+				wpLon[i].setValue(r1.getWP(i).wp_lon);
 				courseDistanceFrom = r1.getWP(i).courseAndDistanceFrom(geoPos);
 				wpCourse[i].setValue(courseDistanceFrom[0]);
 				wpDistance[i].setValue(courseDistanceFrom[1]);

@@ -233,7 +233,7 @@ canvas.NavDisplay.newMFD = func(canvas_group, parent=nil, nd_options=nil, update
 	#print("navdisplay.mfd:ND layer setup completed");
 
 	# TODO: move this to RTE.lcontroller ?
-	me.listen("/autopilot/route-manager/current-wp", func(activeWp) {
+	me.listen("/FMGC/flightplan/r1/current-wp", func(activeWp) {
 		canvas.updatewp( activeWp.getValue() );
 	});
 
@@ -297,19 +297,19 @@ canvas.NavDisplay.update_sub = func(){
 	};
 	# reposition the map, change heading & range:
 	var pln_wpt_idx = getprop(me.efis_path ~ "/inputs/plan-wpt-index");
-	if(me.in_mode("toggle_display_mode", ["PLAN"]) and pln_wpt_idx >= 0) {
+	if(me.in_mode("toggle_display_mode", ["PLAN"]) and pln_wpt_idx >= 0) { # FIXME: Needs props fixed once flightplan.nas supports it
 		if(me.route_driver != nil){
 			var wp = me.route_driver.getPlanModeWP(pln_wpt_idx);
 			if(wp != nil){
 				pos.lat = wp.wp_lat;
 				pos.lon = wp.wp_lon;
 			} else {
-				pos.lat = getprop("/autopilot/route-manager/route/wp["~pln_wpt_idx~"]/latitude-deg");
-				pos.lon = getprop("/autopilot/route-manager/route/wp["~pln_wpt_idx~"]/longitude-deg");
+				pos.lat = getprop("/FMGC/flightplan/r1/wp[" ~ pln_wpt_idx ~ "]/lat");
+				pos.lon = getprop("/FMGC/flightplan/r1/wp[" ~ pln_wpt_idx ~ "]/lon");
 			}
 		} else {
-			pos.lat = getprop("/autopilot/route-manager/route/wp["~pln_wpt_idx~"]/latitude-deg");
-			pos.lon = getprop("/autopilot/route-manager/route/wp["~pln_wpt_idx~"]/longitude-deg");
+			pos.lat = getprop("/FMGC/flightplan/r1/wp[" ~ pln_wpt_idx ~ "]/lat");
+			pos.lon = getprop("/FMGC/flightplan/r1/wp[" ~ pln_wpt_idx ~ "]/lon");
 		}
 	} else {
 		pos.lat = userLat;

@@ -297,7 +297,7 @@ canvas.NavDisplay.update_sub = func(){
 	};
 	# reposition the map, change heading & range:
 	var pln_wpt_idx = getprop(me.efis_path ~ "/inputs/plan-wpt-index");
-	if(me.in_mode("toggle_display_mode", ["PLAN"]) and pln_wpt_idx >= 0) { # FIXME: Needs props fixed once flightplan.nas supports it
+	if(me.in_mode("toggle_display_mode", ["PLAN"]) and pln_wpt_idx >= 0) {
 		if(me.route_driver != nil){
 			var wp = me.route_driver.getPlanModeWP(pln_wpt_idx);
 			if(wp != nil){

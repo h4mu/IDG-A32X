@@ -19,6 +19,7 @@ var courseDistanceFrom = nil;
 var courseDistanceFromPrev = nil;
 var sizeWP = nil;
 var magTrueError = 0;
+var arrivalAirportI = 0;
 var altFeet = props.globals.getNode("/instrumentation/altimeter/indicated-altitude-ft", 1);
 var r1_active_out = props.globals.initNode("/FMGC/flightplan/r1/active", 0, "BOOL");
 var r1_currentWP_out = props.globals.initNode("/FMGC/flightplan/r1/current-wp", 0, "INT");
@@ -26,10 +27,13 @@ var r1_currentLeg_out = props.globals.initNode("/FMGC/flightplan/r1/current-leg"
 var r1_currentLegCourse_out = props.globals.initNode("/FMGC/flightplan/r1/current-leg-course", 0, "DOUBLE");
 var r1_currentLegDist_out = props.globals.initNode("/FMGC/flightplan/r1/current-leg-dist", 0, "DOUBLE");
 var r1_currentLegCourseMag_out = props.globals.initNode("/FMGC/flightplan/r1/current-leg-course-mag", 0, "DOUBLE");
+var r1_arrivalLegDist_out = props.globals.initNode("/FMGC/flightplan/r1/arrival-leg-dist", 0, "DOUBLE");
 var r1_num_out = props.globals.initNode("/FMGC/flightplan/r1/num", 0, "INT");
 var toFromSet = props.globals.initNode("/FMGC/internal/tofrom-set", 0, "BOOL");
 var magHDG = props.globals.getNode("/orientation/heading-magnetic-deg", 1);
 var trueHDG = props.globals.getNode("/orientation/heading-deg", 1);
+var FMGCdep = props.globals.getNode("/FMGC/internal/dep-arpt", 1);
+var FMGCarr = props.globals.getNode("/FMGC/internal/arr-arpt", 1);
 
 # props.nas for flightplan
 var wpID = [props.globals.initNode("/FMGC/flightplan/r1/wp[0]/id", "", "STRING")];
@@ -91,7 +95,7 @@ var flightplan = {
 		}
 	},
 	deleteWP: func(i) {
-		if (r1.getPlanSize() > 2) {
+		if (r1.getPlanSize() > 2 and wpID[i].getValue() != FMGCdep.getValue() and wpID[i].getValue() != FMGCarr.getValue()) { # Not allowed to remove departure or arrival airport
 			r1.deleteWP(i);
 			canvas_nd.A3XXRouteDriver.triggerSignal("fp-removed");
 		}
@@ -153,7 +157,13 @@ var flightplan = {
 					wpCoursePrev[i].setValue(courseDistanceFrom[0]);
 					wpDistancePrev[i].setValue(courseDistanceFrom[1]);
 				}
+				
+				if (wpID[i].getValue() == FMGCarr.getValue()) {
+					arrivalAirportI = i;
+				}
 			}
+			
+			r1_arrivalLegDist_out.setValue(wpDistance[arrivalAirportI].getValue());
 		} else {
 			if (r1_active_out.getBoolValue() != 0) {
 				r1_active_out.setBoolValue(0);

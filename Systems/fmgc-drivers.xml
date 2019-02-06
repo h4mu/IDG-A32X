@@ -449,7 +449,7 @@
 			</condition>
 			<expression>
 				<sum>
-					<property>/FMGC/flightplan/r1/current-leg-course</property>
+					<property>/FMGC/flightplan[1]/current-leg-course</property>
 					<product>
 						<property>/it-autoflight/internal/drift-angle-deg</property>
 						<value>-1.0</value>

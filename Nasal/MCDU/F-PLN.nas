@@ -46,7 +46,7 @@ var fpln_end =         "------END OF F-PLN------";
 var altn_fpln_end =    "----END OF ALTN F-PLN---";
 var no_altn_fpln_end = "------NO ALTN F-PLN-----";
 
-var r1_active_out = props.globals.getNode("/FMGC/flightplan/r1/active");
+var r1_active_out = props.globals.getNode("/FMGC/flightplan[1]/active");
 
 var updateFPLN = func(i) {
 	if (r1_active_out.getBoolValue()) {

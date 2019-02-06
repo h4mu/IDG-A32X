@@ -74,12 +74,12 @@ var searchCmd = func {
 				path = [{},{lon:leg.wp_lon, lat:leg.wp_lat}];
 			else
 				path = leg.path();
-			if(i == (fpSize - 1) and !discontinuity){# WORKAROUND FOR FG BUG
-				var ltype = leg.wp_type;
-				var path_l = size(path);
-				if(ltype != 'runway' and path_l >= 2)
-					path = subvec(path, 0, 1) ~ subvec(path, path_l - 1, 1);
-			}
+#			if(i == (fpSize - 1) and !discontinuity){# WORKAROUND FOR FG BUG -- we don't need it anymore (I think)!
+#				var ltype = leg.wp_type;
+#				var path_l = size(path);
+#				if(ltype != 'runway' and path_l >= 2)
+#					path = subvec(path, 0, 1) ~ subvec(path, path_l - 1, 1);
+#			}
 			coords ~= path;
 			discontinuity = driver.hasDiscontinuity(idx, leg);
 		}

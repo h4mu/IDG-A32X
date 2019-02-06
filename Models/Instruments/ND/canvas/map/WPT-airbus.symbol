@@ -58,16 +58,16 @@ var init = func {
 		var cstr_txt = "\n";
 		if(alt > 0){
 			if(alt > 10000) 
-				cstr_txt ~= sprintf('FL%3.0f', int(alt / 100));
+				cstr_txt ~= sprintf('FL%3d', int(alt / 100));
 			else 
-				cstr_txt ~= sprintf('%4.0f', int(alt));
+				cstr_txt ~= sprintf('%4d', int(alt));
 		}
 		if(spd > 0){
 			if(alt > 0) cstr_txt ~= "\n";
 			if(spd <= 1) 
-				cstr_txt ~= sprintf('%1.2fM', spd);
+				cstr_txt ~= sprintf('%4.2fM', spd);
 			else 
-				cstr_txt ~= sprintf('%3.0fKT', int(spd));
+				cstr_txt ~= sprintf('%3dKT', int(spd));
 		}
 		me.text_alt = wp_group.createChild("text", "wp-alt-text-" ~ me.model.idx)
 		.setDrawMode( canvas.Text.TEXT )

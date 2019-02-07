@@ -7,7 +7,7 @@ print("System: FMGC Dev Version - Copyright (c) 2019 Joshua Davidson (it0uchpods
 
 # 0 = TEMP FP
 # 1 = ACTIVE FP
-var fp = [nil, createFlightplan()];
+var fp = [createFlightplan(), createFlightplan()];
 var wpDep = nil;
 var wpArr = nil;
 var pos = nil;
@@ -20,11 +20,11 @@ var sizeWP = nil;
 var magTrueError = 0;
 var arrivalAirportI = 0;
 
-# vars for MultiFlightplan
+# Vars for MultiFlightplan
 var currentWP = [nil, 0];
 var currentLeg = [nil, ""];
 
-# props.nas for MultiFlightplan
+# Create/Fetch props.nas for MultiFlightplan
 var altFeet = props.globals.getNode("/instrumentation/altimeter/indicated-altitude-ft", 1);
 var active_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/active", 0, "BOOL")];
 var currentWP_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/current-wp", 0, "INT")];
@@ -41,19 +41,26 @@ var FMGCdep = props.globals.getNode("/FMGC/internal/dep-arpt", 1);
 var FMGCarr = props.globals.getNode("/FMGC/internal/arr-arpt", 1);
 var TMPYactive = props.globals.initNode("/FMGC/internal/tmpy-active", 0, "BOOL");
 
-# props.nas for flightplan
-var wpID = [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/id", "", "STRING")];
-var wpLat = [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/lat", 0, "DOUBLE")];
-var wpLon = [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/lon", 0, "DOUBLE")];
-var wpCourse = [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/course", 0, "DOUBLE")];
-var wpDistance = [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/distance", 0, "DOUBLE")];
-var wpCoursePrev = [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/course-from-prev", 0, "DOUBLE")];
-var wpDistancePrev = [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/distance-from-prev", 0, "DOUBLE")];
+# Create props.nas for flightplan
+# Vectors inside vectors, so we can use as many flightplans or waypoints as we want
+var wpID = [[props.globals.initNode("/FMGC/flightplan[0]/wp[0]/id", "", "STRING")], [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/id", "", "STRING")]];
+var wpLat = [[props.globals.initNode("/FMGC/flightplan[0]/wp[0]/lat", 0, "DOUBLE")], [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/lat", 0, "DOUBLE")]];
+var wpLon = [[props.globals.initNode("/FMGC/flightplan[0]/wp[0]/lon", 0, "DOUBLE")], [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/lon", 0, "DOUBLE")]];
+var wpCourse = [[props.globals.initNode("/FMGC/flightplan[0]/wp[0]/course", 0, "DOUBLE")], [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/course", 0, "DOUBLE")]];
+var wpDistance = [[props.globals.initNode("/FMGC/flightplan[0]/wp[0]/distance", 0, "DOUBLE")], [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/distance", 0, "DOUBLE")]];
+var wpCoursePrev = [[props.globals.initNode("/FMGC/flightplan[0]/wp[0]/course-from-prev", 0, "DOUBLE")], [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/course-from-prev", 0, "DOUBLE")]];
+var wpDistancePrev = [[props.globals.initNode("/FMGC/flightplan[0]/wp[0]/distance-from-prev", 0, "DOUBLE")], [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/distance-from-prev", 0, "DOUBLE")]];
 
 var flightplan = {
 	reset: func() {
-		TMPYactive.setBoolValue(1);
+		TMPYactive.setBoolValue(0);
+		me.reset0();
 		me.reset1();
+	},
+	reset0: func() {
+		fp[0].cleanPlan();
+		fp[0].departure = nil;
+		fp[0].destination = nil;
 	},
 	reset1: func() {
 		fp[1].cleanPlan();
@@ -62,13 +69,16 @@ var flightplan = {
 		currentWP[1] = 0;
 		currentLeg[1] = "";
 	},
-	initTempFP: func(i) {
-		fp[0] = fp[1].clone();
+	initTempFP: func(n) {
+		fp[0] = fp[n].clone();
+		me.checkWPOutputs(0);
 		TMPYactive.setBoolValue(1);
 	},
-	executeTempFP: func(i) {
-		
+	executeTempFP: func(n) {
+		fp[n] = fp[0].clone();
+		me.checkWPOutputs(n);
 		TMPYactive.setBoolValue(0);
+		me.reset0();
 	},
 	updateARPT: func(dep, arr, n) {
 		if (n == 1) { # Which flightplan?
@@ -77,10 +87,8 @@ var flightplan = {
 			# Set Departure ARPT
 			if (dep != nil) {
 				fp[1].departure = airportinfo(dep);
-				currentWP[1] = 0;
 			} else {
 				fp[1].departure = nil;
-				currentWP[1] = 0;
 			}
 			
 			# Set Arrival ARPT
@@ -90,21 +98,23 @@ var flightplan = {
 				fp[1].destination = nil;
 			}
 			
-			me.checkWPOutputs();
+			currentWP[1] = 0;
 		}
+		
+		me.checkWPOutputs(n);
 	},
 	insertFix: func(wp, i, n) {
 		var pos = findFixesByID(wp);
 		if (pos != nil and size(pos) > 0) {
 			fp[n].insertWP(createWPFrom(pos[0]), i);
-			me.checkWPOutputs();
+			me.checkWPOutputs(n);
 		}
 	},
 	insertNavaid: func(nav, i, n) {
 		var pos = findNavaidsByID(nav);
 		if (pos != nil and size(pos) > 0) {
 			fp[n].insertWP(createWPFrom(pos[0]), i);
-			me.checkWPOutputs();
+			me.checkWPOutputs(n);
 		}
 	},
 	deleteWP: func(i, n) {
@@ -113,18 +123,18 @@ var flightplan = {
 			canvas_nd.A3XXRouteDriver.triggerSignal("fp-removed");
 		}
 	},
-	checkWPOutputs: func() {
-		canvas_nd.A3XXRouteDriver.triggerSignal("fp-added");
-		sizeWP = size(wpID);
-		for (var counter = sizeWP; counter < fp[1].getPlanSize(); counter += 1) {
-			append(wpID, props.globals.initNode("/FMGC/flightplan[1]/wp[" ~ counter ~ "]/id", "", "STRING"));
-			append(wpLat, props.globals.initNode("/FMGC/flightplan[1]/wp[" ~ counter ~ "]/lat", 0, "DOUBLE"));
-			append(wpLon, props.globals.initNode("/FMGC/flightplan[1]/wp[" ~ counter ~ "]/lon", 0, "DOUBLE"));
-			append(wpCourse, props.globals.initNode("/FMGC/flightplan[1]/wp[" ~ counter ~ "]/course", 0, "DOUBLE"));
-			append(wpDistance, props.globals.initNode("/FMGC/flightplan[1]/wp[" ~ counter ~ "]/distance", 0, "DOUBLE"));
-			append(wpCoursePrev, props.globals.initNode("/FMGC/flightplan[1]/wp[" ~ counter ~ "]/course-from-prev", 0, "DOUBLE"));
-			append(wpDistancePrev, props.globals.initNode("/FMGC/flightplan[1]/wp[" ~ counter ~ "]/distance-from-prev", 0, "DOUBLE"));
+	checkWPOutputs: func(n) {
+		sizeWP = size(wpID[n]);
+		for (var counter = sizeWP; counter < fp[n].getPlanSize(); counter += 1) {
+			append(wpID[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/id", "", "STRING"));
+			append(wpLat[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/lat", 0, "DOUBLE"));
+			append(wpLon[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/lon", 0, "DOUBLE"));
+			append(wpCourse[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/course", 0, "DOUBLE"));
+			append(wpDistance[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/distance", 0, "DOUBLE"));
+			append(wpCoursePrev[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/course-from-prev", 0, "DOUBLE"));
+			append(wpDistancePrev[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/distance-from-prev", 0, "DOUBLE"));
 		}
+		canvas_nd.A3XXRouteDriver.triggerSignal("fp-added");
 	},
 	outputProps: func() {
 		geoPos = geo.aircraft_position();
@@ -159,31 +169,32 @@ var flightplan = {
 				}
 				
 				for (var i = 0; i < fp[n].getPlanSize(); i += 1) {
-					wpID[i].setValue(fp[n].getWP(i).wp_name);
-					wpLat[i].setValue(fp[n].getWP(i).wp_lat);
-					wpLon[i].setValue(fp[n].getWP(i).wp_lon);
+					wpID[n][i].setValue(fp[n].getWP(i).wp_name);
+					wpLat[n][i].setValue(fp[n].getWP(i).wp_lat);
+					wpLon[n][i].setValue(fp[n].getWP(i).wp_lon);
 					courseDistanceFrom = fp[n].getWP(i).courseAndDistanceFrom(geoPos);
-					wpCourse[i].setValue(courseDistanceFrom[0]);
-					wpDistance[i].setValue(courseDistanceFrom[1]);
+					wpCourse[n][i].setValue(courseDistanceFrom[0]);
+					wpDistance[n][i].setValue(courseDistanceFrom[1]);
+					
 					if (i > 0) { # Impossible to do from the first WP
 						geoPosPrev.set_latlon(fp[n].getWP(i - 1).lat, fp[n].getWP(i - 1).lon, altFeet.getValue() * 0.3048);
 						courseDistanceFromPrev = fp[n].getWP(i).courseAndDistanceFrom(geoPosPrev);
-						wpCoursePrev[i].setValue(courseDistanceFromPrev[0]);
-						wpDistancePrev[i].setValue(courseDistanceFromPrev[1]);
+						wpCoursePrev[n][i].setValue(courseDistanceFromPrev[0]);
+						wpDistancePrev[n][i].setValue(courseDistanceFromPrev[1]);
 					} else { # So if its the first WP, we just use current position instead
-						wpCoursePrev[i].setValue(courseDistanceFrom[0]);
-						wpDistancePrev[i].setValue(courseDistanceFrom[1]);
+						wpCoursePrev[n][i].setValue(courseDistanceFrom[0]);
+						wpDistancePrev[n][i].setValue(courseDistanceFrom[1]);
 					}
 					
 					if (n != 0) {
-						if (wpID[i].getValue() == FMGCarr.getValue()) {
+						if (wpID[n][i].getValue() == FMGCarr.getValue()) {
 							arrivalAirportI = i;
 						}
 					}
 				}
 				
 				if (n != 0) {
-					arrivalLegDist_out[n].setValue(wpDistance[arrivalAirportI].getValue());
+					arrivalLegDist_out[n].setValue(wpDistance[n][arrivalAirportI].getValue());
 				}
 			} else {
 				if (n != 0) {

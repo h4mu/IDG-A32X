@@ -1,39 +1,45 @@
-# A3XX FMGC Flightplan System
+# A3XX FMGC Flightplan Driver
+
 # Copyright (c) 2019 Joshua Davidson (it0uchpods)
 # This thing replaces the Route Manager, it's far from finished though
 print("System: You are using an experimental version of the IDG-A32X. Things may go TERRIBLY WRONG!");
 print("System: FMGC Dev Version - Copyright (c) 2019 Joshua Davidson (it0uchpods)");
 
-# r0 = TEMP FP
-# r1 = ACTIVE FP
-var r1 = createFlightplan();
+# 0 = TEMP FP
+# 1 = ACTIVE FP
+var fp = [nil, createFlightplan()];
 var wpDep = nil;
 var wpArr = nil;
 var pos = nil;
-var r1_currentWP = 0;
-var r1_currentLeg = nil;
-var r1_currentLegCourseDist = 0;
 var geoPos = nil;
 var geoPosPrev = geo.Coord.new();
+var currentLegCourseDist = nil;
 var courseDistanceFrom = nil;
 var courseDistanceFromPrev = nil;
 var sizeWP = nil;
 var magTrueError = 0;
 var arrivalAirportI = 0;
+
+# vars for MultiFlightplan
+var currentWP = [nil, 0];
+var currentLeg = [nil, ""];
+
+# props.nas for MultiFlightplan
 var altFeet = props.globals.getNode("/instrumentation/altimeter/indicated-altitude-ft", 1);
-var r1_active_out = props.globals.initNode("/FMGC/flightplan[1]/active", 0, "BOOL");
-var r1_currentWP_out = props.globals.initNode("/FMGC/flightplan[1]/current-wp", 0, "INT");
-var r1_currentLeg_out = props.globals.initNode("/FMGC/flightplan[1]/current-leg", "", "STRING");
-var r1_currentLegCourse_out = props.globals.initNode("/FMGC/flightplan[1]/current-leg-course", 0, "DOUBLE");
-var r1_currentLegDist_out = props.globals.initNode("/FMGC/flightplan[1]/current-leg-dist", 0, "DOUBLE");
-var r1_currentLegCourseMag_out = props.globals.initNode("/FMGC/flightplan[1]/current-leg-course-mag", 0, "DOUBLE");
-var r1_arrivalLegDist_out = props.globals.initNode("/FMGC/flightplan[1]/arrival-leg-dist", 0, "DOUBLE");
-var r1_num_out = props.globals.initNode("/FMGC/flightplan[1]/num", 0, "INT");
+var active_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/active", 0, "BOOL")];
+var currentWP_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/current-wp", 0, "INT")];
+var currentLeg_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/current-leg", "", "STRING")];
+var currentLegCourse_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/current-leg-course", 0, "DOUBLE")];
+var currentLegDist_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/current-leg-dist", 0, "DOUBLE")];
+var currentLegCourseMag_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/current-leg-course-mag", 0, "DOUBLE")];
+var arrivalLegDist_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/arrival-leg-dist", 0, "DOUBLE")];
+var num_out = [props.globals.initNode("/FMGC/flightplan[0]/num", 0, "INT"), props.globals.initNode("/FMGC/flightplan[1]/num", 0, "INT")];
 var toFromSet = props.globals.initNode("/FMGC/internal/tofrom-set", 0, "BOOL");
 var magHDG = props.globals.getNode("/orientation/heading-magnetic-deg", 1);
 var trueHDG = props.globals.getNode("/orientation/heading-deg", 1);
 var FMGCdep = props.globals.getNode("/FMGC/internal/dep-arpt", 1);
 var FMGCarr = props.globals.getNode("/FMGC/internal/arr-arpt", 1);
+var TMPYactive = props.globals.initNode("/FMGC/internal/tmpy-active", 0, "BOOL");
 
 # props.nas for flightplan
 var wpID = [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/id", "", "STRING")];
@@ -46,16 +52,23 @@ var wpDistancePrev = [props.globals.initNode("/FMGC/flightplan[1]/wp[0]/distance
 
 var flightplan = {
 	reset: func() {
-#		me.reset0();
+		TMPYactive.setBoolValue(1);
 		me.reset1();
 	},
 	reset1: func() {
-		r1.cleanPlan();
-		r1.departure = nil;
-		r1.destination = nil;
-		r1_currentWP = 0;
-		r1_currentWPData = nil;
-		r1_currentLeg = nil;
+		fp[1].cleanPlan();
+		fp[1].departure = nil;
+		fp[1].destination = nil;
+		currentWP[1] = 0;
+		currentLeg[1] = "";
+	},
+	initTempFP: func(i) {
+		fp[0] = fp[1].clone();
+		TMPYactive.setBoolValue(1);
+	},
+	executeTempFP: func(i) {
+		
+		TMPYactive.setBoolValue(0);
 	},
 	updateARPT: func(dep, arr, n) {
 		if (n == 1) { # Which flightplan?
@@ -63,47 +76,47 @@ var flightplan = {
 			
 			# Set Departure ARPT
 			if (dep != nil) {
-				r1.departure = airportinfo(dep);
-				r1_currentWP = 0;
+				fp[1].departure = airportinfo(dep);
+				currentWP[1] = 0;
 			} else {
-				r1.departure = nil;
-				r1_currentWP = 0;
+				fp[1].departure = nil;
+				currentWP[1] = 0;
 			}
 			
 			# Set Arrival ARPT
 			if (arr != nil) {
-				r1.destination = airportinfo(arr);
+				fp[1].destination = airportinfo(arr);
 			} else {
-				r1.destination = nil;
+				fp[1].destination = nil;
 			}
 			
 			me.checkWPOutputs();
 		}
 	},
-	insertFix: func(wp, i) {
+	insertFix: func(wp, i, n) {
 		var pos = findFixesByID(wp);
 		if (pos != nil and size(pos) > 0) {
-			r1.insertWP(createWPFrom(pos[0]), i);
+			fp[n].insertWP(createWPFrom(pos[0]), i);
 			me.checkWPOutputs();
 		}
 	},
-	insertNavaid: func(nav, i) {
+	insertNavaid: func(nav, i, n) {
 		var pos = findNavaidsByID(nav);
 		if (pos != nil and size(pos) > 0) {
-			r1.insertWP(createWPFrom(pos[0]), i);
+			fp[n].insertWP(createWPFrom(pos[0]), i);
 			me.checkWPOutputs();
 		}
 	},
-	deleteWP: func(i) {
-		if (r1.getPlanSize() > 2 and wpID[i].getValue() != FMGCdep.getValue() and wpID[i].getValue() != FMGCarr.getValue()) { # Not allowed to remove departure or arrival airport
-			r1.deleteWP(i);
+	deleteWP: func(i, n) {
+		if (fp[n].getPlanSize() > 2 and wpID[i].getValue() != FMGCdep.getValue() and wpID[i].getValue() != FMGCarr.getValue()) { # Not allowed to remove departure or arrival airport
+			fp[n].deleteWP(i);
 			canvas_nd.A3XXRouteDriver.triggerSignal("fp-removed");
 		}
 	},
 	checkWPOutputs: func() {
 		canvas_nd.A3XXRouteDriver.triggerSignal("fp-added");
 		sizeWP = size(wpID);
-		for (var counter = sizeWP; counter < r1.getPlanSize(); counter += 1) {
+		for (var counter = sizeWP; counter < fp[1].getPlanSize(); counter += 1) {
 			append(wpID, props.globals.initNode("/FMGC/flightplan[1]/wp[" ~ counter ~ "]/id", "", "STRING"));
 			append(wpLat, props.globals.initNode("/FMGC/flightplan[1]/wp[" ~ counter ~ "]/lat", 0, "DOUBLE"));
 			append(wpLon, props.globals.initNode("/FMGC/flightplan[1]/wp[" ~ counter ~ "]/lon", 0, "DOUBLE"));
@@ -116,75 +129,88 @@ var flightplan = {
 	outputProps: func() {
 		geoPos = geo.aircraft_position();
 		
-		if (r1_currentWP > r1.getPlanSize()) {
-			r1_currentWP = r1.getPlanSize();
-		}
-		
-		if (toFromSet.getBoolValue() and r1.departure != nil and r1.destination != nil) {
-			if (r1_active_out.getBoolValue() != 1) {
-				r1_active_out.setBoolValue(1);
-			}
-			
-			if (r1_num_out.getValue() != r1.getPlanSize()) {
-				r1_num_out.setValue(r1.getPlanSize());
-			}
-			
-			r1_currentLeg = r1.getWP(r1_currentWP).wp_name;
-			if (r1_currentLeg_out.getValue() != r1_currentLeg) {
-				r1_currentLeg_out.setValue(r1_currentLeg);
-			}
-			
-			r1_currentLegCourseDist = r1.getWP(r1_currentWP).courseAndDistanceFrom(geoPos);
-			r1_currentLegCourse_out.setValue(r1_currentLegCourseDist[0]);
-			r1_currentLegDist_out.setValue(r1_currentLegCourseDist[1]);
-			
-			magTrueError = magHDG.getValue() - trueHDG.getValue();
-			r1_currentLegCourseMag_out.setValue(r1_currentLegCourseDist[0] + magTrueError); # Convert to Magnetic
-			
-			for (var i = 0; i < r1.getPlanSize(); i += 1) {
-				wpID[i].setValue(r1.getWP(i).wp_name);
-				wpLat[i].setValue(r1.getWP(i).wp_lat);
-				wpLon[i].setValue(r1.getWP(i).wp_lon);
-				courseDistanceFrom = r1.getWP(i).courseAndDistanceFrom(geoPos);
-				wpCourse[i].setValue(courseDistanceFrom[0]);
-				wpDistance[i].setValue(courseDistanceFrom[1]);
-				if (i > 0) { # Impossible to do from the first WP
-					geoPosPrev.set_latlon(r1.getWP(i - 1).lat, r1.getWP(i - 1).lon, altFeet.getValue() * 0.3048);
-					courseDistanceFromPrev = r1.getWP(i).courseAndDistanceFrom(geoPosPrev);
-					wpCoursePrev[i].setValue(courseDistanceFromPrev[0]);
-					wpDistancePrev[i].setValue(courseDistanceFromPrev[1]);
-				} else { # So if its the first WP, we just use current position instead
-					wpCoursePrev[i].setValue(courseDistanceFrom[0]);
-					wpDistancePrev[i].setValue(courseDistanceFrom[1]);
+		for (var n = 0; n < 2; n += 1) { # Note: Some things don't get done for TMPY (0) hence all the if (n != 0) {}
+			if (((n == 0 and TMPYactive.getBoolValue()) or n > 0) and toFromSet.getBoolValue() and fp[n].departure != nil and fp[n].destination != nil) {
+				if (n != 0) {
+					if (currentWP[n] > fp[n].getPlanSize()) {
+						currentWP[n] = fp[n].getPlanSize();
+					}
+					
+					if (active_out[n].getBoolValue() != 1) {
+						active_out[n].setBoolValue(1);
+					}
+					
+					currentLeg[n] = fp[n].getWP(currentWP[n]).wp_name;
+					
+					if (currentLeg_out[n].getValue() != currentLeg[n]) {
+						currentLeg_out[n].setValue(currentLeg[n]);
+					}
+					
+					currentLegCourseDist = fp[n].getWP(currentWP[n]).courseAndDistanceFrom(geoPos);
+					currentLegCourse_out[n].setValue(currentLegCourseDist[0]);
+					currentLegDist_out[n].setValue(currentLegCourseDist[1]);
+					
+					magTrueError = magHDG.getValue() - trueHDG.getValue();
+					currentLegCourseMag_out[n].setValue(currentLegCourseDist[0] + magTrueError); # Convert to Magnetic
 				}
 				
-				if (wpID[i].getValue() == FMGCarr.getValue()) {
-					arrivalAirportI = i;
+				if (num_out[n].getValue() != fp[n].getPlanSize()) {
+					num_out[n].setValue(fp[n].getPlanSize());
+				}
+				
+				for (var i = 0; i < fp[n].getPlanSize(); i += 1) {
+					wpID[i].setValue(fp[n].getWP(i).wp_name);
+					wpLat[i].setValue(fp[n].getWP(i).wp_lat);
+					wpLon[i].setValue(fp[n].getWP(i).wp_lon);
+					courseDistanceFrom = fp[n].getWP(i).courseAndDistanceFrom(geoPos);
+					wpCourse[i].setValue(courseDistanceFrom[0]);
+					wpDistance[i].setValue(courseDistanceFrom[1]);
+					if (i > 0) { # Impossible to do from the first WP
+						geoPosPrev.set_latlon(fp[n].getWP(i - 1).lat, fp[n].getWP(i - 1).lon, altFeet.getValue() * 0.3048);
+						courseDistanceFromPrev = fp[n].getWP(i).courseAndDistanceFrom(geoPosPrev);
+						wpCoursePrev[i].setValue(courseDistanceFromPrev[0]);
+						wpDistancePrev[i].setValue(courseDistanceFromPrev[1]);
+					} else { # So if its the first WP, we just use current position instead
+						wpCoursePrev[i].setValue(courseDistanceFrom[0]);
+						wpDistancePrev[i].setValue(courseDistanceFrom[1]);
+					}
+					
+					if (n != 0) {
+						if (wpID[i].getValue() == FMGCarr.getValue()) {
+							arrivalAirportI = i;
+						}
+					}
+				}
+				
+				if (n != 0) {
+					arrivalLegDist_out[n].setValue(wpDistance[arrivalAirportI].getValue());
+				}
+			} else {
+				if (n != 0) {
+					if (active_out[n].getBoolValue() != 0) {
+						active_out[n].setBoolValue(0);
+					}
+					
+					if (currentLeg_out[n].getValue() != "") {
+						currentLeg_out[n].setValue("");
+					}
+				}
+				
+				if (num_out[n].getValue() != 0) {
+					num_out[n].setValue(0);
 				}
 			}
 			
-			r1_arrivalLegDist_out.setValue(wpDistance[arrivalAirportI].getValue());
-		} else {
-			if (r1_active_out.getBoolValue() != 0) {
-				r1_active_out.setBoolValue(0);
-			}
-			
-			if (r1_num_out.getValue() != 0) {
-				r1_num_out.setValue(0);
-			}
-			
-			if (r1_currentLeg_out.getValue() != "") {
-				r1_currentLeg_out.setValue("");
-			}
-		}
-		
-		if (r1_currentWP != nil) {
-			if (r1_currentWP_out.getValue() != r1_currentWP) {
-				r1_currentWP_out.setValue(r1_currentWP);
-			}
-		} else {
-			if (r1_currentWP_out.getValue() != 0) {
-				r1_currentWP_out.setValue(0);
+			if (n != 0) {
+				if (currentWP[n] != nil) {
+					if (currentWP_out[n].getValue() != currentWP[n]) {
+						currentWP_out[n].setValue(currentWP[n]);
+					}
+				} else {
+					if (currentWP_out[n].getValue() != 0) {
+						currentWP_out[n].setValue(0);
+					}
+				}
 			}
 		}
 		

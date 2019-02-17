@@ -110,6 +110,19 @@ var flightplan = {
 		if (pos != nil and size(pos) > 0) {
 			fp[n].insertWP(createWPFrom(pos[0]), i);
 			me.checkWPOutputs(n);
+			return 0;
+		} else {
+			return 1;
+		}
+	},
+	insertArpt: func(wp, i, n) {
+		var pos = findAirportsByICAO(wp);
+		if (pos != nil and size(pos) > 0) {
+			fp[n].insertWP(createWPFrom(pos[0]), i);
+			me.checkWPOutputs(n);
+			return 0;
+		} else {
+			return 1;
 		}
 	},
 	insertNavaid: func(nav, i, n) {
@@ -117,12 +130,27 @@ var flightplan = {
 		if (pos != nil and size(pos) > 0) {
 			fp[n].insertWP(createWPFrom(pos[0]), i);
 			me.checkWPOutputs(n);
+			return 0;
+		} else {
+			return 1;
 		}
 	},
+	insertPPOS: func(n) {
+		fp[n].insertWP(createWP(geo.aircraft_position(), "PPOS"), 0);
+		me.checkWPOutputs(n);
+	},
+	insertTP: func(n) {
+		fp[n].insertWP(createWP(geo.aircraft_position(), "T/P"), 0);
+		me.checkWPOutputs(n);
+	},
 	deleteWP: func(i, n) {
-		if (fp[n].getPlanSize() > 2 and wpID[i].getValue() != FMGCdep.getValue() and wpID[i].getValue() != FMGCarr.getValue()) { # Not allowed to remove departure or arrival airport
+		var wp = wpID[n][i].getValue();
+		if (fp[n].getPlanSize() > 2 and wp != FMGCdep.getValue() and wp != FMGCarr.getValue() and wp != "T/P" and wp != "PPOS") {
 			fp[n].deleteWP(i);
 			canvas_nd.A3XXRouteDriver.triggerSignal("fp-removed");
+			return 0;
+		} else {
+			return 1;
 		}
 	},
 	checkWPOutputs: func(n) {

@@ -78,6 +78,12 @@ var updateFPLN = func(i) {
 	num = num_out[fp].getValue();
 	
 	if (active_out[1].getBoolValue()) {
+#		if (offset[i] + offsetThreshold > num + 2) {
+#			if (num + 2 - offsetThreshold >= 0) {
+#				offset[i] = num - offsetThreshold;
+#			}
+#		}
+		
 		# Line 1:
 		if (offset[i] < num) {
 			left1[i].setValue(fmgc.wpID[fp][offset[i]].getValue());
@@ -222,10 +228,6 @@ var updateFPLN = func(i) {
 			left7[i] = "";
 		}
 		
-#		if (offset[i] + offsetThreshold > num) {
-#			offset[i] = num - offsetThreshold;
-#		}
-		
 		if (offset[i] > 0) {
 			showFromInd[i].setBoolValue(0);
 		} else {
@@ -247,4 +249,73 @@ var updateFPLN = func(i) {
 		left6[i].setValue("");
 		left6s[i].setValue("");
 	}
+}
+
+# Button and Inputs
+var FPLNButton = func(s, key, i) {
+	if (s == "L") {
+		var input = offset[i] + key - 1; # Where to insert waypoint?
+		var scratchpad = getprop("/MCDU[" ~ i ~ "]/scratchpad");
+		
+		if (key == 6 and TMPYActive_out.getBoolValue()) {
+			TMPYActive.setBoolValue(0);
+		} else {
+			if (scratchpad == "CLR") {
+				if (!TMPYActive.getBoolValue()) {
+					fmgc.flightplan.initTempFP(1);
+				}
+				if (fmgc.flightplan.deleteWP(input, 0) != 0) {
+					notAllowed(i);
+				} else {
+					setprop("/MCDU[" ~ i ~ "]/scratchpad-msg", 0);
+					setprop("/MCDU[" ~ i ~ "]/scratchpad", "");
+				}
+			} else {
+				if (size(scratchpad) == 5) {
+					if (!TMPYActive.getBoolValue()) {
+						fmgc.flightplan.initTempFP(1);
+					}
+					if (fmgc.flightplan.insertFix(scratchpad, input, 0) != 0) {
+						notInDataBase(i);
+					} else {
+						setprop("/MCDU[" ~ i ~ "]/scratchpad", "");
+					}
+				} else if (size(scratchpad) == 4) {
+					if (!TMPYActive.getBoolValue()) {
+						fmgc.flightplan.initTempFP(1);
+					}
+					if (fmgc.flightplan.insertArpt(scratchpad, input, 0) != 0) {
+						notInDataBase(i);
+					} else {
+						setprop("/MCDU[" ~ i ~ "]/scratchpad", "");
+					}
+				} else if (size(scratchpad) == 3) {
+					if (!TMPYActive.getBoolValue()) {
+						fmgc.flightplan.initTempFP(1);
+					}
+					if (fmgc.flightplan.insertNavaid(scratchpad, input, 0) != 0) {
+						notInDataBase(i);
+					} else {
+						setprop("/MCDU[" ~ i ~ "]/scratchpad", "");
+					}
+				} else {
+					notAllowed(i);
+				}
+			}
+		}
+	} else if (s == "R") {
+		if (key == 6 and TMPYActive_out.getBoolValue()) {
+			fmgc.flightplan.executeTempFP(1);
+		} else {
+			notAllowed(i);
+		}
+	}
+}
+
+var notInDataBase = func(i) {
+	if (getprop("/MCDU[" ~ i ~ "]/scratchpad") != "NOT IN DATABASE") {
+		setprop("/MCDU[" ~ i ~ "]/last-scratchpad", getprop("/MCDU[" ~ i ~ "]/scratchpad"));
+	}
+	setprop("/MCDU[" ~ i ~ "]/scratchpad-msg", 1);
+	setprop("/MCDU[" ~ i ~ "]/scratchpad", "NOT IN DATABASE");
 }

@@ -18,7 +18,7 @@ var courseDistanceFrom = nil;
 var courseDistanceFromPrev = nil;
 var sizeWP = nil;
 var magTrueError = 0;
-var arrivalAirportI = 0;
+var arrivalAirportI = [0, 0];
 
 # Vars for MultiFlightplan
 var currentWP = [nil, 0];
@@ -32,14 +32,14 @@ var currentLeg_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/current-l
 var currentLegCourse_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/current-leg-course", 0, "DOUBLE")];
 var currentLegDist_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/current-leg-dist", 0, "DOUBLE")];
 var currentLegCourseMag_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/current-leg-course-mag", 0, "DOUBLE")];
-var arrivalLegDist_out = [nil, props.globals.initNode("/FMGC/flightplan[1]/arrival-leg-dist", 0, "DOUBLE")];
+var arrivalLegDist_out = [props.globals.initNode("/FMGC/flightplan[0]/arrival-leg-dist", 0, "DOUBLE"), props.globals.initNode("/FMGC/flightplan[1]/arrival-leg-dist", 0, "DOUBLE")];
 var num_out = [props.globals.initNode("/FMGC/flightplan[0]/num", 0, "INT"), props.globals.initNode("/FMGC/flightplan[1]/num", 0, "INT")];
 var toFromSet = props.globals.initNode("/FMGC/internal/tofrom-set", 0, "BOOL");
 var magHDG = props.globals.getNode("/orientation/heading-magnetic-deg", 1);
 var trueHDG = props.globals.getNode("/orientation/heading-deg", 1);
 var FMGCdep = props.globals.getNode("/FMGC/internal/dep-arpt", 1);
 var FMGCarr = props.globals.getNode("/FMGC/internal/arr-arpt", 1);
-var TMPYactive = props.globals.initNode("/FMGC/internal/tmpy-active", 0, "BOOL");
+var TMPYActive = props.globals.initNode("/FMGC/internal/tmpy-active", 0, "BOOL");
 
 # Create props.nas for flightplan
 # Vectors inside vectors, so we can use as many flightplans or waypoints as we want
@@ -53,7 +53,7 @@ var wpDistancePrev = [[props.globals.initNode("/FMGC/flightplan[0]/wp[0]/distanc
 
 var flightplan = {
 	reset: func() {
-		TMPYactive.setBoolValue(0);
+		TMPYActive.setBoolValue(0);
 		me.reset0();
 		me.reset1();
 	},
@@ -72,12 +72,12 @@ var flightplan = {
 	initTempFP: func(n) {
 		fp[0] = fp[n].clone();
 		me.checkWPOutputs(0);
-		TMPYactive.setBoolValue(1);
+		TMPYActive.setBoolValue(1);
 	},
 	executeTempFP: func(n) {
 		fp[n] = fp[0].clone();
 		me.checkWPOutputs(n);
-		TMPYactive.setBoolValue(0);
+		TMPYActive.setBoolValue(0);
 		me.reset0();
 	},
 	updateARPT: func(dep, arr, n) {
@@ -140,7 +140,7 @@ var flightplan = {
 		geoPos = geo.aircraft_position();
 		
 		for (var n = 0; n < 2; n += 1) { # Note: Some things don't get done for TMPY (0) hence all the if (n != 0) {}
-			if (((n == 0 and TMPYactive.getBoolValue()) or n > 0) and toFromSet.getBoolValue() and fp[n].departure != nil and fp[n].destination != nil) {
+			if (((n == 0 and TMPYActive.getBoolValue()) or n > 0) and toFromSet.getBoolValue() and fp[n].departure != nil and fp[n].destination != nil) {
 				if (n != 0) {
 					if (currentWP[n] > fp[n].getPlanSize()) {
 						currentWP[n] = fp[n].getPlanSize();
@@ -186,16 +186,12 @@ var flightplan = {
 						wpDistancePrev[n][i].setValue(courseDistanceFrom[1]);
 					}
 					
-					if (n != 0) {
-						if (wpID[n][i].getValue() == FMGCarr.getValue()) {
-							arrivalAirportI = i;
-						}
+					if (wpID[n][i].getValue() == FMGCarr.getValue()) {
+						arrivalAirportI[n] = i;
 					}
 				}
 				
-				if (n != 0) {
-					arrivalLegDist_out[n].setValue(wpDistance[n][arrivalAirportI].getValue());
-				}
+				arrivalLegDist_out[n].setValue(wpDistance[n][arrivalAirportI[n]].getValue());
 			} else {
 				if (n != 0) {
 					if (active_out[n].getBoolValue() != 0) {

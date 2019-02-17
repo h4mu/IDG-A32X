@@ -697,7 +697,7 @@ var ap_various = func {
 			setprop("/it-autoflight/internal/lnav-advance-nm", turn_dist);
 			
 			if (getprop("/FMGC/flightplan[1]/current-leg-dist") <= turn_dist) {
-				r1_currentWP = r1_currentWP + 1;
+				currentWP[1] = currentWP[1] + 1;
 			}
 		}
 	}

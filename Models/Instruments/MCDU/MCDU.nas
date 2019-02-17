@@ -11,8 +11,6 @@ var symbol = "helvetica_medium.txf";
 var normal = 70;
 var small = 56;
 var page = "";
-var flightNum = props.globals.initNode("/MCDUC/flight-num", "", "STRING");
-var flightNumSet = props.globals.initNode("/MCDUC/flight-num-set", 0, "BOOL");
 var fplnl1 = "";
 var fplnl1s = "";
 var fplnl2 = "";
@@ -106,6 +104,7 @@ var engOutAcc = props.globals.getNode("/FMGC/internal/eng-out-reduc", 1);
 var engOutAccSet = props.globals.getNode("/MCDUC/reducacc-set", 1);
 var transAlt = props.globals.getNode("/FMGC/internal/trans-alt", 1);
 var managedSpeed = props.globals.getNode("/it-autoflight/input/spd-managed", 1);
+var TMPYActive = props.globals.getNode("/MCDUC/tmpy-active", 1);
 
 # Fetch nodes into vectors
 var pageProp = [props.globals.getNode("/MCDU[0]/page", 1), props.globals.getNode("/MCDU[1]/page", 1)];
@@ -129,6 +128,7 @@ var fpln3c = [props.globals.getNode("/MCDU[0]/F-PLN/line-3c", 1), props.globals.
 var fpln4c = [props.globals.getNode("/MCDU[0]/F-PLN/line-4c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-4c", 1)];
 var fpln5c = [props.globals.getNode("/MCDU[0]/F-PLN/line-5c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-5c", 1)];
 var fpln6c = [props.globals.getNode("/MCDU[0]/F-PLN/line-6c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-6c", 1)];
+var showFromInd = [props.globals.getNode("MCDU[0]/F-PLN/show-from", 1), props.globals.getNode("MCDU[1]/F-PLN/show-from", 1)];
 
 # Create Nodes:
 var pageSwitch = [props.globals.initNode("/MCDU[0]/internal/switch", 0, "BOOL"), props.globals.initNode("/MCDU[1]/internal/switch", 0, "BOOL")];
@@ -183,7 +183,7 @@ var canvas_MCDU_base = {
 		"Simple_L1_Arrow","Simple_L2_Arrow","Simple_L3_Arrow","Simple_L4_Arrow","Simple_L5_Arrow","Simple_L6_Arrow","Simple_R1","Simple_R2","Simple_R3","Simple_R4","Simple_R5","Simple_R6","Simple_R1S","Simple_R2S","Simple_R3S","Simple_R4S","Simple_R5S",
 		"Simple_R6S","Simple_R1_Arrow","Simple_R2_Arrow","Simple_R3_Arrow","Simple_R4_Arrow","Simple_R5_Arrow","Simple_R6_Arrow","Simple_C1","Simple_C2","Simple_C3","Simple_C4","Simple_C5","Simple_C6","Simple_C1S","Simple_C2S","Simple_C3S","Simple_C4S",
 		"Simple_C5S","Simple_C6S","INITA","INITA_CoRoute","INITA_FltNbr","INITA_CostIndex","INITA_CruiseFLTemp","INITA_FromTo","INITA_InitRequest","INITA_AlignIRS","INITB","INITB_ZFWCG","INITB_ZFW","INITB_ZFW_S","INITB_Block","PERFTO","PERFTO_V1","PERFTO_VR",
-		"PERFTO_V2","PERFTO_FE","PERFTO_SE","PERFTO_OE","FPLN","FPLN_From","FPLN_Callsign","FPLN_L1","FPLN_L2","FPLN_L3","FPLN_L4","FPLN_L5","FPLN_L6","FPLN_L1S","FPLN_L2S","FPLN_L3S","FPLN_L4S","FPLN_L5S","FPLN_L6S"];
+		"PERFTO_V2","PERFTO_FE","PERFTO_SE","PERFTO_OE","FPLN","FPLN_From","FPLN_TMPY_group","FPLN_Callsign","FPLN_L1","FPLN_L2","FPLN_L3","FPLN_L4","FPLN_L5","FPLN_L6","FPLN_L1S","FPLN_L2S","FPLN_L3S","FPLN_L4S","FPLN_L5S","FPLN_L6S"];
 	},
 	update: func() {
 		if (ac1.getValue() >= 110 and mcdu1_lgt.getValue() > 0.01) {
@@ -212,17 +212,17 @@ var canvas_MCDU_base = {
 				me["Simple_PageNum"].hide();
 				me["ArrowLeft"].show();
 				me["ArrowRight"].show();
-
+				
 				pageSwitch[i].setBoolValue(1);
 			}
-
+			
 			if (flightNumSet.getValue()) {
 				me["FPLN_Callsign"].setText(flightNum.getValue());
 				me["FPLN_Callsign"].show();
 			} else {
 				me["FPLN_Callsign"].hide();
 			}
-
+			
 			fplnl1 = fplnL1[i].getValue();
 			if (fplnl1 != "") {
 				me["FPLN_L1"].setText(fplnl1);
@@ -230,7 +230,7 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_L1"].hide();
 			}
-
+			
 			fplnl2 = fplnL2[i].getValue();
 			if (fplnl2 != "") {
 				me["FPLN_L2"].setText(fplnl2);
@@ -238,7 +238,7 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_L2"].hide();
 			}
-
+			
 			fplnl3 = fplnL3[i].getValue();
 			if (fplnl3 != "") {
 				me["FPLN_L3"].setText(fplnl3);
@@ -246,7 +246,7 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_L3"].hide();
 			}
-
+			
 			fplnl4 = fplnL4[i].getValue();
 			if (fplnl4 != "") {
 				me["FPLN_L4"].setText(fplnl4);
@@ -254,7 +254,7 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_L4"].hide();
 			}
-
+			
 			fplnl5 = fplnL5[i].getValue();
 			if (fplnl5 != "") {
 				me["FPLN_L5"].setText(fplnl5);
@@ -262,7 +262,7 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_L5"].hide();
 			}
-
+			
 			fplnl6 = fplnL6[i].getValue();
 			if (fplnl6 != "") {
 				me["FPLN_L6"].setText(fplnl6);
@@ -270,7 +270,7 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_L6"].hide();
 			}
-
+			
 			fplnl1s = fplnL1s[i].getValue();
 			if (fplnl1s != "") {
 				me["FPLN_L1S"].setText(fplnl1s);
@@ -278,7 +278,7 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_L1S"].hide();
 			}
-
+			
 			fplnl2s = fplnL2s[i].getValue();
 			if (fplnl2s != "") {
 				me["FPLN_L2S"].setText(fplnl2s);
@@ -286,7 +286,7 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_L2S"].hide();
 			}
-
+			
 			fplnl3s = fplnL3s[i].getValue();
 			if (fplnl3s != "") {
 				me["FPLN_L3S"].setText(fplnl3s);
@@ -294,7 +294,7 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_L3S"].hide();
 			}
-
+			
 			fplnl4s = fplnL4s[i].getValue();
 			if (fplnl4s != "") {
 				me["FPLN_L4S"].setText(fplnl4s);
@@ -302,7 +302,7 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_L4S"].hide();
 			}
-
+			
 			fplnl5s = fplnL5s[i].getValue();
 			if (fplnl5s != "") {
 				me["FPLN_L5S"].setText(fplnl5s);
@@ -310,7 +310,7 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_L5S"].hide();
 			}
-
+			
 			fplnl6s = fplnL6s[i].getValue();
 			if (fplnl6s != "") {
 				me["FPLN_L6S"].setText(fplnl6s);
@@ -318,7 +318,19 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_L6S"].hide();
 			}
-
+			
+			if (showFromInd[i].getBoolValue()) {
+				me["FPLN_From"].show();
+			} else {
+				me["FPLN_From"].hide();
+			}
+			
+			if (TMPYActive.getBoolValue()) {
+				me["FPLN_TMPY_group"].show();
+			} else {
+				me["FPLN_TMPY_group"].hide();
+			}
+			
 			if (fplnCSwitch[i].getBoolValue() != 1) {
 				me.FPLNcolor(fpln1c[i].getValue(), fpln2c[i].getValue(), fpln3c[i].getValue(), fpln4c[i].getValue(), fpln5c[i].getValue(), fpln6c[i].getValue());
 				fplnCSwitch[i].setBoolValue(1);
@@ -1743,17 +1755,11 @@ var canvas_MCDU_base = {
 	},
 	FPLNcolor: func(a, b, c, d, e, f) {
 		me["FPLN_L1"].setColor(getprop("/MCDUC/colors/" ~ a ~ "/r"), getprop("/MCDUC/colors/" ~ a ~ "/g"), getprop("/MCDUC/colors/" ~ a ~ "/b"));
-		me["FPLN_L1S"].setColor(getprop("/MCDUC/colors/" ~ a ~ "/r"), getprop("/MCDUC/colors/" ~ a ~ "/g"), getprop("/MCDUC/colors/" ~ a ~ "/b"));
 		me["FPLN_L2"].setColor(getprop("/MCDUC/colors/" ~ b ~ "/r"), getprop("/MCDUC/colors/" ~ b ~ "/g"), getprop("/MCDUC/colors/" ~ b ~ "/b"));
-		me["FPLN_L2S"].setColor(getprop("/MCDUC/colors/" ~ b ~ "/r"), getprop("/MCDUC/colors/" ~ b ~ "/g"), getprop("/MCDUC/colors/" ~ b ~ "/b"));
 		me["FPLN_L3"].setColor(getprop("/MCDUC/colors/" ~ c ~ "/r"), getprop("/MCDUC/colors/" ~ c ~ "/g"), getprop("/MCDUC/colors/" ~ c ~ "/b"));
-		me["FPLN_L3S"].setColor(getprop("/MCDUC/colors/" ~ c ~ "/r"), getprop("/MCDUC/colors/" ~ c ~ "/g"), getprop("/MCDUC/colors/" ~ c ~ "/b"));
 		me["FPLN_L4"].setColor(getprop("/MCDUC/colors/" ~ d ~ "/r"), getprop("/MCDUC/colors/" ~ d ~ "/g"), getprop("/MCDUC/colors/" ~ d ~ "/b"));
-		me["FPLN_L4S"].setColor(getprop("/MCDUC/colors/" ~ d ~ "/r"), getprop("/MCDUC/colors/" ~ d ~ "/g"), getprop("/MCDUC/colors/" ~ d ~ "/b"));
 		me["FPLN_L5"].setColor(getprop("/MCDUC/colors/" ~ e ~ "/r"), getprop("/MCDUC/colors/" ~ e ~ "/g"), getprop("/MCDUC/colors/" ~ e ~ "/b"));
-		me["FPLN_L5S"].setColor(getprop("/MCDUC/colors/" ~ e ~ "/r"), getprop("/MCDUC/colors/" ~ e ~ "/g"), getprop("/MCDUC/colors/" ~ e ~ "/b"));
 		me["FPLN_L6"].setColor(getprop("/MCDUC/colors/" ~ f ~ "/r"), getprop("/MCDUC/colors/" ~ f ~ "/g"), getprop("/MCDUC/colors/" ~ f ~ "/b"));
-		me["FPLN_L6S"].setColor(getprop("/MCDUC/colors/" ~ f ~ "/r"), getprop("/MCDUC/colors/" ~ f ~ "/g"), getprop("/MCDUC/colors/" ~ f ~ "/b"));
 	},
 	# 0 = ignore
 	fontLeft: func (a, b, c, d, e, f) {

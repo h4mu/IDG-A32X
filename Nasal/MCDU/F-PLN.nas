@@ -10,7 +10,8 @@ var left3 = [props.globals.initNode("MCDU[0]/F-PLN/left-3", "", "STRING"), props
 var left4 = [props.globals.initNode("MCDU[0]/F-PLN/left-4", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-4", "", "STRING")];
 var left5 = [props.globals.initNode("MCDU[0]/F-PLN/left-5", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-5", "", "STRING")];
 var left6 = [props.globals.initNode("MCDU[0]/F-PLN/left-6", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-6", "", "STRING")];
-var left7 = ["", ""]; # Not actually used, only for logic
+var left6i = ["", ""]; # Not actually used, only for logic
+var left7i = ["", ""]; # Not actually used, only for logic
 var left1s = [props.globals.initNode("MCDU[0]/F-PLN/left-1s", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-1s", "", "STRING")];
 var left2s = [props.globals.initNode("MCDU[0]/F-PLN/left-2s", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-2s", "", "STRING")];
 var left3s = [props.globals.initNode("MCDU[0]/F-PLN/left-3s", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-3s", "", "STRING")];
@@ -56,7 +57,7 @@ setlistener("/FMGC/internal/tmpy-active", func {
 
 var slewFPLN = func(d, i) {
 	if (d == 1) {
-		if (left7[i] != "" and offsetThreshold == 6) {
+		if (left7i[i] != "" and offsetThreshold == 6) {
 			offset[i] = offset[i] + 1;
 		} else if (left6[i].getValue() != "" and offsetThreshold == 5) {
 			offset[i] = offset[i] + 1;
@@ -78,11 +79,17 @@ var updateFPLN = func(i) {
 	num = num_out[fp].getValue();
 	
 	if (active_out[1].getBoolValue()) {
-#		if (offset[i] + offsetThreshold > num + 2) {
-#			if (num + 2 - offsetThreshold >= 0) {
-#				offset[i] = num - offsetThreshold;
-#			}
-#		}
+		# Logic for offset control
+		if (offset[i] + 5 <= num + 1) {
+			left6i[i] = " ";
+		} else {
+			left6i[i] = "";
+		}
+		if (offset[i] + 6 <= num + 1) {
+			left7i[i] = " ";
+		} else {
+			left7i[i] = "";
+		}
 		
 		# Line 1:
 		if (offset[i] < num) {
@@ -216,18 +223,6 @@ var updateFPLN = func(i) {
 			left6[i].setValue("");
 		}
 		
-		# Line 7:
-		# Not actually used, only for logic
-		if (offset[i] + 6 < num) {
-			left7[i] = fmgc.wpID[fp][offset[i] + 6].getValue();
-		} else if (offset[i] + 6 == num) {
-			left7[i] = fpln_end;
-		} else if (offset[i] + 6 == num + 1) {
-			left7[i] = no_altn_fpln_end;
-		} else {
-			left7[i] = "";
-		}
-		
 		if (offset[i] > 0) {
 			showFromInd[i].setBoolValue(0);
 		} else {
@@ -236,6 +231,7 @@ var updateFPLN = func(i) {
 		
 		TMPYActive_out.setBoolValue(TMPYActive.getBoolValue()); # Only engage MCDU TMPY mode once the nessesary flightplan changes have been made.
 	} else {
+		offset[i] = 0;
 		left1[i].setValue(fpln_end);
 		left1s[i].setValue("");
 		left2[i].setValue(no_altn_fpln_end);

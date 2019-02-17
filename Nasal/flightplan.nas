@@ -146,6 +146,13 @@ var flightplan = {
 	deleteWP: func(i, n) {
 		var wp = wpID[n][i].getValue();
 		if (fp[n].getPlanSize() > 2 and wp != FMGCdep.getValue() and wp != FMGCarr.getValue() and wp != "T/P" and wp != "PPOS") {
+			for (var x = 0; x < 2; x += 1) { # If there is a blank that would come into view after delete, fix it.
+				if (mcdu.left6i[x] == "" and TMPYActive.getBoolValue()) {
+					math.max(mcdu.offset[x] = mcdu.offset[x] - 1, 0);
+				} else if (mcdu.left7i[x] == "" and !TMPYActive.getBoolValue()) {
+					math.max(mcdu.offset[x] = mcdu.offset[x] - 1, 0);
+				}
+			}
 			fp[n].deleteWP(i);
 			canvas_nd.A3XXRouteDriver.triggerSignal("fp-removed");
 			return 0;

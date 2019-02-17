@@ -329,9 +329,13 @@ var arrowbutton = func(btn, i) {
 			setprop("/MCDU[" ~ i ~ "]/page", "PRINTFUNC");
 		}
 	} else if (btn == "up") {
-		# Nothing for now
+		if (getprop("/MCDU[" ~ i ~ "]/page") == "F-PLNA" or getprop("/MCDU[" ~ i ~ "]/page") == "F-PLNB") {
+			slewFPLN(1, i);
+		}
 	} else if (btn == "down") {
-		# Nothing for now
+		if (getprop("/MCDU[" ~ i ~ "]/page") == "F-PLNA" or getprop("/MCDU[" ~ i ~ "]/page") == "F-PLNB") {
+			slewFPLN(-1, i);
+		}
 	}
 }
 

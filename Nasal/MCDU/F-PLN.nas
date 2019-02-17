@@ -10,6 +10,7 @@ var left3 = [props.globals.initNode("MCDU[0]/F-PLN/left-3", "", "STRING"), props
 var left4 = [props.globals.initNode("MCDU[0]/F-PLN/left-4", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-4", "", "STRING")];
 var left5 = [props.globals.initNode("MCDU[0]/F-PLN/left-5", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-5", "", "STRING")];
 var left6 = [props.globals.initNode("MCDU[0]/F-PLN/left-6", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-6", "", "STRING")];
+var left7 = ["", ""]; # Not actually used, only for logic
 var left1s = [props.globals.initNode("MCDU[0]/F-PLN/left-1s", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-1s", "", "STRING")];
 var left2s = [props.globals.initNode("MCDU[0]/F-PLN/left-2s", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-2s", "", "STRING")];
 var left3s = [props.globals.initNode("MCDU[0]/F-PLN/left-3s", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-3s", "", "STRING")];
@@ -30,21 +31,48 @@ var altn_fpln_end =    "----END OF ALTN F-PLN---";
 var no_altn_fpln_end = "------NO ALTN F-PLN-----";
 
 var offset = [0, 0];
-var fp = 0;
+var fp = 1;
 var num = 0;
 var wpColor = "grn";
+var page = "";
+var offsetThreshold = 6; # 6 WPs for F-PLN, 5 for TMPY F-PLN
 var active_out = [nil, props.globals.getNode("/FMGC/flightplan[1]/active")];
 var num_out = [props.globals.getNode("/FMGC/flightplan[0]/num"), props.globals.getNode("/FMGC/flightplan[1]/num")];
 var TMPYActive = props.globals.getNode("/FMGC/internal/tmpy-active");
 var TMPYActive_out = props.globals.initNode("/MCDUC/tmpy-active", 0, "BOOL");
+var pageProp = [props.globals.getNode("/MCDU[0]/page", 1), props.globals.getNode("/MCDU[1]/page", 1)];
 
-var updateFPLN = func(i) {
+setlistener("/FMGC/internal/tmpy-active", func {
 	if (TMPYActive.getBoolValue()) {
 		fp = 0;
 		wpColor = "yel";
+		offsetThreshold = 5;
 	} else {
 		fp = 1;
 		wpColor = "grn";
+		offsetThreshold = 6;
+	}
+}, 0, 0);
+
+var slewFPLN = func(d, i) {
+	if (d == 1) {
+		if (left7[i] != "" and offsetThreshold == 6) {
+			offset[i] = offset[i] + 1;
+		} else if (left6[i].getValue() != "" and offsetThreshold == 5) {
+			offset[i] = offset[i] + 1;
+		}
+	} else if (d == -1) {
+		if (offset[i] > 0) {
+			offset[i] = offset[i] - 1;
+		}
+	}
+}
+
+var updateFPLN = func(i) {
+	page = pageProp[i].getValue();
+	
+	if (page != "F-PLNA" and page != "F-PLNB") {
+		offset[i] = 0; # Reset offset to 0 when no longer viewing F-PLN page
 	}
 	
 	num = num_out[fp].getValue();
@@ -161,31 +189,42 @@ var updateFPLN = func(i) {
 		}
 		
 		# Line 6:
-		if (fp != 0) {
-			if (offset[i] + 5 < num) {
-				left6[i].setValue(fmgc.wpID[fp][offset[i] + 5].getValue());
-				if (offset[i] + 5 == fmgc.arrivalAirportI[fp]) {
-					left6s[i].setValue("DEST");
-					line6c[i].setValue("wht");
-				} else {
-					left6s[i].setValue("C" ~ math.round(fmgc.wpCoursePrev[fp][offset[i] + 5].getValue()) ~ "g");
-					line6c[i].setValue(wpColor);
-				}
-			} else if (offset[i] + 5 == num) {
-				left6[i].setValue(fpln_end);
-				left6s[i].setValue("");
-				line6c[i].setValue("wht");
-			} else if (offset[i] + 5 == num + 1) {
-				left6[i].setValue(no_altn_fpln_end);
-				left6s[i].setValue("");
+		if (offset[i] + 5 < num) {
+			left6[i].setValue(fmgc.wpID[fp][offset[i] + 5].getValue());
+			if (offset[i] + 5 == fmgc.arrivalAirportI[fp]) {
+				left6s[i].setValue("DEST");
 				line6c[i].setValue("wht");
 			} else {
-				left6[i].setValue("");
+				left6s[i].setValue("C" ~ math.round(fmgc.wpCoursePrev[fp][offset[i] + 5].getValue()) ~ "g");
+				line6c[i].setValue(wpColor);
 			}
+		} else if (offset[i] + 5 == num) {
+			left6[i].setValue(fpln_end);
+			left6s[i].setValue("");
+			line6c[i].setValue("wht");
+		} else if (offset[i] + 5 == num + 1) {
+			left6[i].setValue(no_altn_fpln_end);
+			left6s[i].setValue("");
+			line6c[i].setValue("wht");
 		} else {
 			left6[i].setValue("");
-			left6s[i].setValue("");
 		}
+		
+		# Line 7:
+		# Not actually used, only for logic
+		if (offset[i] + 6 < num) {
+			left7[i] = fmgc.wpID[fp][offset[i] + 6].getValue();
+		} else if (offset[i] + 6 == num) {
+			left7[i] = fpln_end;
+		} else if (offset[i] + 6 == num + 1) {
+			left7[i] = no_altn_fpln_end;
+		} else {
+			left7[i] = "";
+		}
+		
+#		if (offset[i] + offsetThreshold > num) {
+#			offset[i] = num - offsetThreshold;
+#		}
 		
 		if (offset[i] > 0) {
 			showFromInd[i].setBoolValue(0);

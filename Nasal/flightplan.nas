@@ -79,6 +79,8 @@ var flightplan = {
 		me.checkWPOutputs(n);
 		TMPYActive.setBoolValue(0);
 		me.reset0();
+		mcdu.offset[0] = 0;
+		mcdu.offset[1] = 0;
 	},
 	updateARPT: func(dep, arr, n) {
 		if (n == 1) { # Which flightplan?
@@ -226,4 +228,4 @@ var flightplan = {
 	},
 };
 
-var outputPropsTimer = maketimer(0.4, flightplan.outputProps);
+var outputPropsTimer = maketimer(0.1, flightplan.outputProps);

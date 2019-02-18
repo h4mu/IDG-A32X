@@ -31,6 +31,7 @@ var no_altn_fpln_end = "------NO ALTN F-PLN-----";
 
 var num = 0;
 var page = "";
+var wpList = [["WP0", "WP1", "WP2", "WP3", "WP4", "WP5"], ["WP0", "WP1", "WP2", "WP3", "WP4", "WP5"]];
 var active_out = [nil, nil, props.globals.getNode("/FMGC/flightplan[2]/active")];
 var num_out = [props.globals.getNode("/FMGC/flightplan[0]/num"), props.globals.getNode("/FMGC/flightplan[1]/num"), props.globals.getNode("/FMGC/flightplan[2]/num")];
 var TMPYActive = [props.globals.getNode("/FMGC/internal/tmpy-active[0]"), props.globals.getNode("/FMGC/internal/tmpy-active[1]")];
@@ -39,12 +40,12 @@ var pageProp = [props.globals.getNode("/MCDU[0]/page", 1), props.globals.getNode
 
 # Create text items
 var StaticText = {
-	new: func (type) {
-		var i = {parents:[StaticText]};
-		i.type = type;
-		return i;
+	new: func(type) {
+		var in = {parents:[StaticText]};
+		in.type = type;
+		return in;
 	},
-	getText: func {
+	getText: func() {
 		if (me.type == "discontinuity") {
 			return "---F-PLN DISCONTINUITY--";
 		} else if (me.type == "fplnEnd") {
@@ -55,13 +56,56 @@ var StaticText = {
 			return "------NO ALTN F-PLN-----";
 		}
 	},
-	getColor: func {
+	getColor: func() {
 		return "wht";
 	},
 	type: nil,
+	pushButtonLeft: func() {
+		
+	},
+	pushButtonRight: func() {
+		
+	},
 };
 
-var slewFPLN = func(d, i) {
+var MCDUText = {
+	new: func(wp) {
+		var in = {parents:[MCDUText]};
+		in.wp = wp;
+		return in;
+	},
+	getText: func(i) {
+		if (TMPYActive_out[i].getBoolValue()) {
+			left1[i].setValue(fmgc.wpID[i][me.wp].getValue());
+		} else {
+			left1[i].setValue(fmgc.wpID[2][me.wp].getValue());
+		}
+	},
+	getColor: func(i) {
+		if (TMPYActive_out[i].getBoolValue()) {
+			if (me.wp == fmgc.arrivalAirportI[i]) {
+				return "wht";
+			} else {
+				return "yel";
+			}
+		} else {
+			if (me.wp == fmgc.arrivalAirportI[2]) {
+				return "wht";
+			} else {
+				return "grn";
+			}
+		}
+	},
+	wp: nil,
+	pushButtonLeft: func() {
+		
+	},
+	pushButtonRight: func() {
+		
+	},
+};
+
+var slewFPLN = func(d, i) { # Scrolling function. d is -1 or 1 for direction, and i is instance.
 	
 }
 
@@ -69,8 +113,13 @@ var updateFPLN = func(i) {
 	page = pageProp[i].getValue();
 	
 	if (active_out[2].getBoolValue()) {
-		
-		TMPYActive_out[i].setBoolValue(TMPYActive[i].getBoolValue());
+		left1[i].setValue(wpList[i][0]);
+		left2[i].setValue(wpList[i][1]);
+		left3[i].setValue(wpList[i][2]);
+		left4[i].setValue(wpList[i][3]);
+		left5[i].setValue(wpList[i][4]);
+		left6[i].setValue(wpList[i][5]);
+		TMPYActive_out[i].setBoolValue(TMPYActive[i].getBoolValue()); # Delayed, so that we only update the MCDU once text is set to prevent color mismatching.
 	} else {
 		left1[i].setValue("");
 		left1s[i].setValue("");

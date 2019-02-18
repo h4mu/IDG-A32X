@@ -338,7 +338,7 @@ var lateral = func {
 		setprop("/it-autoflight/mode/lat", "HDG");
 		setprop("/it-autoflight/mode/arm", " ");
 	} else if (latset == 1) {
-		if (getprop("/FMGC/flightplan[1]/num") > 0 and getprop("/FMGC/flightplan[1]/active") == 1 and getprop("/position/gear-agl-ft") >= 30) {
+		if (getprop("/FMGC/flightplan[2]/num") > 0 and getprop("/FMGC/flightplan[2]/active") == 1 and getprop("/position/gear-agl-ft") >= 30) {
 			make_lnav_active();
 		} else {
 			if (getprop("/it-autoflight/output/lat") != 1) {
@@ -396,7 +396,7 @@ var lat_arm = func {
 		setprop("/it-autoflight/mode/arm", " ");
 		setprop("/it-autoflight/custom/show-hdg", 1);
 	} else if (latset == 1) {
-		if (getprop("/FMGC/flightplan[1]/num") > 0 and getprop("/FMGC/flightplan[1]/active") == 1) {
+		if (getprop("/FMGC/flightplan[2]/num") > 0 and getprop("/FMGC/flightplan[2]/active") == 1) {
 			setprop("/it-autoflight/input/lat-arm", 1);
 			setprop("/it-autoflight/mode/arm", "LNV");
 		}
@@ -571,7 +571,7 @@ var vertical = func {
 		setprop("/it-autoflight/internal/alt", altinput);
 		thrustmodet.start();
 	} else if (vertset == 8) {
-		if (getprop("/FMGC/flightplan[1]/num") > 0 and getprop("/FMGC/flightplan[1]/active") == 1 and getprop("/it-autoflight/internal/alt-const") >= 100) {
+		if (getprop("/FMGC/flightplan[2]/num") > 0 and getprop("/FMGC/flightplan[2]/active") == 1 and getprop("/it-autoflight/internal/alt-const") >= 100) {
 			alandt.stop();
 			alandt1.stop();
 			setprop("/it-autoflight/output/appr-armed", 0);
@@ -662,19 +662,19 @@ var ap_various = func {
 		setprop("/it-autoflight/internal/bank-limit", 25);
 	}
 	
-	if (getprop("/FMGC/flightplan[1]/num") > 0 and getprop("/FMGC/flightplan[1]/active") == 1) {
-		if ((getprop("/FMGC/flightplan[1]/current-wp") + 1) < getprop("/FMGC/flightplan[1]/num")) {
+	if (getprop("/FMGC/flightplan[2]/num") > 0 and getprop("/FMGC/flightplan[2]/active") == 1) {
+		if ((getprop("/FMGC/flightplan[2]/current-wp") + 1) < getprop("/FMGC/flightplan[2]/num")) {
 			gnds_mps = getprop("/velocities/groundspeed-kt") * 0.5144444444444;
-			wp_fly_from = getprop("/FMGC/flightplan[1]/current-wp");
+			wp_fly_from = getprop("/FMGC/flightplan[2]/current-wp");
 			if (wp_fly_from < 0) {
 				wp_fly_from = 0;
 			}
-			current_course = getprop("/FMGC/flightplan[1]/wp[" ~ wp_fly_from ~ "]/course");
-			wp_fly_to = getprop("/FMGC/flightplan[1]/current-wp") + 1;
+			current_course = getprop("/FMGC/flightplan[2]/wp[" ~ wp_fly_from ~ "]/course");
+			wp_fly_to = getprop("/FMGC/flightplan[2]/current-wp") + 1;
 			if (wp_fly_to < 0) {
 				wp_fly_to = 0;
 			}
-			next_course = getprop("/FMGC/flightplan[1]/wp[" ~ wp_fly_to ~ "]/course");
+			next_course = getprop("/FMGC/flightplan[2]/wp[" ~ wp_fly_to ~ "]/course");
 			max_bank_limit = getprop("/it-autoflight/internal/bank-limit");
 
 			delta_angle = math.abs(geo.normdeg180(current_course - next_course));
@@ -696,8 +696,8 @@ var ap_various = func {
 			}
 			setprop("/it-autoflight/internal/lnav-advance-nm", turn_dist);
 			
-			if (getprop("/FMGC/flightplan[1]/current-leg-dist") <= turn_dist) {
-				currentWP[1] = currentWP[1] + 1;
+			if (getprop("/FMGC/flightplan[2]/current-leg-dist") <= turn_dist) {
+				currentWP[2] = currentWP[2] + 1;
 			}
 		}
 	}
@@ -914,7 +914,7 @@ var check_arms = func {
 }
 
 var update_arms = func {
-	if (getprop("/it-autoflight/input/lat-arm") == 1 and getprop("/FMGC/flightplan[1]/num") > 0 and getprop("/FMGC/flightplan[1]/active") == 1 and getprop("/position/gear-agl-ft") >= 30) {
+	if (getprop("/it-autoflight/input/lat-arm") == 1 and getprop("/FMGC/flightplan[2]/num") > 0 and getprop("/FMGC/flightplan[2]/active") == 1 and getprop("/position/gear-agl-ft") >= 30) {
 		make_lnav_active();
 	}
 	if (getprop("/instrumentation/nav[0]/in-range") == 1) {
@@ -1014,10 +1014,10 @@ var aland1 = func {
 
 # Managed Climb/Descent
 var mng_main = func {
-	if (getprop("/FMGC/flightplan[1]/num") > 0 and getprop("/FMGC/flightplan[1]/active") == 1) {
+	if (getprop("/FMGC/flightplan[2]/num") > 0 and getprop("/FMGC/flightplan[2]/active") == 1) {
 		altinput = getprop("/it-autoflight/input/alt");
 		setprop("/it-autoflight/internal/alt", altinput);
-		var wp_curr = getprop("/FMGC/flightplan[1]/current-wp");
+		var wp_curr = getprop("/FMGC/flightplan[2]/current-wp");
 		var mng_alt_wp = getprop("/autopilot/route-manager/route/wp", wp_curr, "altitude-ft");
 		if (getprop("/it-autoflight/internal/alt-const") == mng_alt_wp) {
 			# Do nothing
@@ -1056,7 +1056,7 @@ setlistener("/it-autoflight/internal/alt-const", func {
 	}
 });
 
-setlistener("/FMGC/flightplan[1]/current-wp", func {
+setlistener("/FMGC/flightplan[2]/current-wp", func {
 	if (getprop("/it-autoflight/output/vert") == 8) {
 		mng_alt_selector();
 		mng_run();
@@ -1064,11 +1064,11 @@ setlistener("/FMGC/flightplan[1]/current-wp", func {
 });
 
 var mng_run = func {
-	if (getprop("/FMGC/flightplan[1]/num") > 0 and getprop("/FMGC/flightplan[1]/active") == 1) {
-		var wp_curr = getprop("/FMGC/flightplan[1]/current-wp");
-		var wptnum = getprop("/FMGC/flightplan[1]/current-wp");
+	if (getprop("/FMGC/flightplan[2]/num") > 0 and getprop("/FMGC/flightplan[2]/active") == 1) {
+		var wp_curr = getprop("/FMGC/flightplan[2]/current-wp");
+		var wptnum = getprop("/FMGC/flightplan[2]/current-wp");
 		var mng_alt_wp = getprop("/autopilot/route-manager/route/wp",wp_curr,"altitude-ft");
-		if ((wptnum - 1) < getprop("/FMGC/flightplan[1]/num")) {
+		if ((wptnum - 1) < getprop("/FMGC/flightplan[2]/num")) {
 			var mng_alt_wp_prev = getprop("/autopilot/route-manager/route/wp",wp_curr - 1,"altitude-ft");
 			var altcurr = getprop("/instrumentation/altimeter/indicated-altitude-ft");
 			if (mng_alt_wp_prev >= 100) {
@@ -1134,11 +1134,11 @@ var mng_run = func {
 
 # Managed Top of Descent
 var mng_des_tod = func {
-	if (getprop("/FMGC/flightplan[1]/num") > 0 and getprop("/FMGC/flightplan[1]/active") == 1) {
-		var wp_curr = getprop("/FMGC/flightplan[1]/current-wp");
+	if (getprop("/FMGC/flightplan[2]/num") > 0 and getprop("/FMGC/flightplan[2]/active") == 1) {
+		var wp_curr = getprop("/FMGC/flightplan[2]/current-wp");
 		var mng_alt_wp = getprop("/autopilot/route-manager/route/wp",wp_curr,"altitude-ft");
 		var alt_curr = getprop("/instrumentation/altimeter/indicated-altitude-ft");
-		var dist = getprop("/FMGC/flightplan[1]/current-leg-dist");
+		var dist = getprop("/FMGC/flightplan[2]/current-leg-dist");
 		var vdist = dist + 1;
 		var alttl = abs(alt_curr - mng_alt_wp);
 		setprop("/it-autoflight/internal/top-of-des-nm", (alttl / 1000) * 3);
@@ -1180,7 +1180,7 @@ var mng_alt_selector = func {
 			setprop("/it-autoflight/internal/mng-alt", getprop("/it-autoflight/internal/alt-const"));
 		}
 	} else if (getprop("/it-autoflight/internal/mng-mode") == "DES") {
-		var dist = getprop("/FMGC/flightplan[1]/current-leg-dist");
+		var dist = getprop("/FMGC/flightplan[2]/current-leg-dist");
 		var vdist = dist - 1;
 		if (vdist < getprop("/it-autoflight/internal/top-of-des-nm")) {
 			if (sdif <= vdif) {
@@ -1231,7 +1231,7 @@ var mng_des_pth = func {
 	mng_altcaptt.start();
 }
 var mng_des_fpm = func {
-	if (getprop("/FMGC/flightplan[1]/num") > 0 and getprop("/FMGC/flightplan[1]/active") == 1) {
+	if (getprop("/FMGC/flightplan[2]/num") > 0 and getprop("/FMGC/flightplan[2]/active") == 1) {
 		var gndspd = getprop("/velocities/groundspeed-kt");
 		var desfpm = ((gndspd * 0.5) * 10);
 		setprop("/it-autoflight/internal/mng-fpm", desfpm);

@@ -31,11 +31,35 @@ var no_altn_fpln_end = "------NO ALTN F-PLN-----";
 
 var num = 0;
 var page = "";
-var active_out = [nil, props.globals.getNode("/FMGC/flightplan[1]/active")];
-var num_out = [props.globals.getNode("/FMGC/flightplan[0]/num"), props.globals.getNode("/FMGC/flightplan[1]/num")];
-var TMPYActive = props.globals.getNode("/FMGC/internal/tmpy-active");
-var TMPYActive_out = props.globals.initNode("/MCDUC/tmpy-active", 0, "BOOL");
+var active_out = [nil, nil, props.globals.getNode("/FMGC/flightplan[2]/active")];
+var num_out = [props.globals.getNode("/FMGC/flightplan[0]/num"), props.globals.getNode("/FMGC/flightplan[1]/num"), props.globals.getNode("/FMGC/flightplan[2]/num")];
+var TMPYActive = [props.globals.getNode("/FMGC/internal/tmpy-active[0]"), props.globals.getNode("/FMGC/internal/tmpy-active[1]")];
+var TMPYActive_out = [props.globals.initNode("/MCDU[0]/tmpy-active", 0, "BOOL"), props.globals.initNode("/MCDU[1]/tmpy-active", 0, "BOOL")];
 var pageProp = [props.globals.getNode("/MCDU[0]/page", 1), props.globals.getNode("/MCDU[1]/page", 1)];
+
+# Create text items
+var StaticText = {
+	new: func (type) {
+		var i = {parents:[StaticText]};
+		i.type = type;
+		return i;
+	},
+	getText: func {
+		if (me.type == "discontinuity") {
+			return "---F-PLN DISCONTINUITY--";
+		} else if (me.type == "fplnEnd") {
+			return "------END OF F-PLN------";
+		} else if (me.type == "altnFplnEnd") {
+			return "----END OF ALTN F-PLN---";
+		} else if (me.type == "noAltnFpln") {
+			return "------NO ALTN F-PLN-----";
+		}
+	},
+	getColor: func {
+		return "wht";
+	},
+	type: nil,
+};
 
 var slewFPLN = func(d, i) {
 	
@@ -44,8 +68,9 @@ var slewFPLN = func(d, i) {
 var updateFPLN = func(i) {
 	page = pageProp[i].getValue();
 	
-	if (active_out[1].getBoolValue()) {
+	if (active_out[2].getBoolValue()) {
 		
+		TMPYActive_out[i].setBoolValue(TMPYActive[i].getBoolValue());
 	} else {
 		left1[i].setValue("");
 		left1s[i].setValue("");
@@ -59,6 +84,7 @@ var updateFPLN = func(i) {
 		left5s[i].setValue("");
 		left6[i].setValue("");
 		left6s[i].setValue("");
+		TMPYActive_out[i].setBoolValue(0);
 	}
 }
 

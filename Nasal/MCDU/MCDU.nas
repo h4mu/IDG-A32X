@@ -377,7 +377,7 @@ var pagebutton = func(btn, i) {
 			setprop("/MCDU[" ~ i ~ "]/scratchpad", "SELECT DESIRED SYSTEM");
 			setprop("/MCDU[" ~ i ~ "]/page", "MCDU");
 		} else if (btn == "f-pln") {
-			if (active_out[1].getBoolValue()) {
+			if (active_out[2].getBoolValue()) {
 				setprop("/MCDU[" ~ i ~ "]/page", "F-PLNA");
 			} else {
 				setprop("/MCDU[" ~ i ~ "]/scratchpad-msg", 1);

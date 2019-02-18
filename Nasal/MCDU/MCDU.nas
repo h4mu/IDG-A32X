@@ -377,7 +377,12 @@ var pagebutton = func(btn, i) {
 			setprop("/MCDU[" ~ i ~ "]/scratchpad", "SELECT DESIRED SYSTEM");
 			setprop("/MCDU[" ~ i ~ "]/page", "MCDU");
 		} else if (btn == "f-pln") {
-			setprop("/MCDU[" ~ i ~ "]/page", "F-PLNA");
+			if (active_out[1].getBoolValue()) {
+				setprop("/MCDU[" ~ i ~ "]/page", "F-PLNA");
+			} else {
+				setprop("/MCDU[" ~ i ~ "]/scratchpad-msg", 1);
+				setprop("/MCDU[" ~ i ~ "]/scratchpad", "ERROR. INITIALIZE ROUTE"); # Should be ERROR:, but the : character doesn't show in our MCDU font right now...
+			}
 		} else if (btn == "fuel-pred") {
 			setprop("/MCDU[" ~ i ~ "]/page", "FUELPRED");
 		}

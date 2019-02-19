@@ -117,13 +117,6 @@ var TMPYActive = [props.globals.getNode("/FMGC/internal/tmpy-active[0]"), props.
 var pageProp = [props.globals.getNode("/MCDU[0]/page", 1), props.globals.getNode("/MCDU[1]/page", 1)];
 var active = [props.globals.getNode("/MCDU[0]/active", 1), props.globals.getNode("/MCDU[1]/active", 1)];
 var scratchpad = [props.globals.getNode("/MCDU[0]/scratchpad", 1), props.globals.getNode("/MCDU[1]/scratchpad", 1)];
-var fplnL1s = [props.globals.getNode("/MCDU[0]/F-PLN/left-1s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-1s", 1)];
-var fplnL2s = [props.globals.getNode("/MCDU[0]/F-PLN/left-2s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-2s", 1)];
-var fplnL3s = [props.globals.getNode("/MCDU[0]/F-PLN/left-3s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-3s", 1)];
-var fplnL4s = [props.globals.getNode("/MCDU[0]/F-PLN/left-4s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-4s", 1)];
-var fplnL5s = [props.globals.getNode("/MCDU[0]/F-PLN/left-5s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-5s", 1)];
-var fplnL6s = [props.globals.getNode("/MCDU[0]/F-PLN/left-6s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-6s", 1)];
-var showFromInd = [props.globals.getNode("MCDU[0]/F-PLN/show-from", 1), props.globals.getNode("MCDU[1]/F-PLN/show-from", 1)];
 
 # Create Nodes:
 var pageSwitch = [props.globals.initNode("/MCDU[0]/internal/switch", 0, "BOOL"), props.globals.initNode("/MCDU[1]/internal/switch", 0, "BOOL")];
@@ -217,135 +210,135 @@ var canvas_MCDU_base = {
 				me["FPLN_Callsign"].hide();
 			}
 			
-			fplnLineSize = size(mcdu.MCDULines[i].output);
+			fplnLineSize = size(mcdu.FPLNLines[i].output);
 			
 			if (fplnLineSize >= 1) {
-				fplnl1 = mcdu.MCDULines[i].output[0].getText(i);
+				fplnl1 = mcdu.FPLNLines[i].output[0].getText();
 				if (fplnl1 != "") {
-					me["FPLN_L1"].setColor(mcdu.MCDULines[i].output[0].getColor(i));
+					me["FPLN_L1"].setColor(mcdu.FPLNLines[i].output[0].getColor(i));
 					me["FPLN_L1"].setText(fplnl1);
 					me["FPLN_L1"].show();
 				} else {
 					me["FPLN_L1"].hide();
 				}
+				fplnl1s = mcdu.FPLNLines[i].output[0].getSubText();
+				if (fplnl1s != "") {
+					me["FPLN_L1S"].setText(fplnl1s);
+					me["FPLN_L1S"].show();
+				} else {
+					me["FPLN_L1S"].hide();
+				}
 			} else {
 				me["FPLN_L1"].hide();
+				me["FPLN_L1S"].hide();
 			}
 			
 			if (fplnLineSize >= 2) {
-				fplnl2 = mcdu.MCDULines[i].output[1].getText(i);
+				fplnl2 = mcdu.FPLNLines[i].output[1].getText();
 				if (fplnl2 != "") {
-					me["FPLN_L2"].setColor(mcdu.MCDULines[i].output[1].getColor(i));
+					me["FPLN_L2"].setColor(mcdu.FPLNLines[i].output[1].getColor(i));
 					me["FPLN_L2"].setText(fplnl2);
 					me["FPLN_L2"].show();
 				} else {
 					me["FPLN_L2"].hide();
 				}
+				fplnl2s = mcdu.FPLNLines[i].output[1].getSubText();
+				if (fplnl2s != "") {
+					me["FPLN_L2S"].setText(fplnl2s);
+					me["FPLN_L2S"].show();
+				} else {
+					me["FPLN_L2S"].hide();
+				}
 			} else {
 				me["FPLN_L2"].hide();
+				me["FPLN_L2S"].hide();
 			}
 			
 			if (fplnLineSize >= 3) {
-				fplnl3 = mcdu.MCDULines[i].output[2].getText(i);
+				fplnl3 = mcdu.FPLNLines[i].output[2].getText();
 				if (fplnl3 != "") {
-					me["FPLN_L3"].setColor(mcdu.MCDULines[i].output[2].getColor(i));
+					me["FPLN_L3"].setColor(mcdu.FPLNLines[i].output[2].getColor(i));
 					me["FPLN_L3"].setText(fplnl3);
 					me["FPLN_L3"].show();
 				} else {
 					me["FPLN_L3"].hide();
 				}
+				fplnl3s = mcdu.FPLNLines[i].output[2].getSubText();
+				if (fplnl3s != "") {
+					me["FPLN_L3S"].setText(fplnl3s);
+					me["FPLN_L3S"].show();
+				} else {
+					me["FPLN_L3S"].hide();
+				}
 			} else {
 				me["FPLN_L3"].hide();
+				me["FPLN_L3S"].hide();
 			}
 			
 			if (fplnLineSize >= 4) {
-				fplnl4 = mcdu.MCDULines[i].output[3].getText(i);
+				fplnl4 = mcdu.FPLNLines[i].output[3].getText();
 				if (fplnl4 != "") {
-					me["FPLN_L4"].setColor(mcdu.MCDULines[i].output[3].getColor(i));
+					me["FPLN_L4"].setColor(mcdu.FPLNLines[i].output[3].getColor(i));
 					me["FPLN_L4"].setText(fplnl4);
 					me["FPLN_L4"].show();
 				} else {
 					me["FPLN_L4"].hide();
 				}
+				fplnl4s = mcdu.FPLNLines[i].output[3].getSubText();
+				if (fplnl4s != "") {
+					me["FPLN_L4S"].setText(fplnl4s);
+					me["FPLN_L4S"].show();
+				} else {
+					me["FPLN_L4S"].hide();
+				}
 			} else {
 				me["FPLN_L4"].hide();
+				me["FPLN_L4S"].hide();
 			}
 			
 			if (fplnLineSize >= 5) {
-				fplnl5 = mcdu.MCDULines[i].output[4].getText(i);
+				fplnl5 = mcdu.FPLNLines[i].output[4].getText();
 				if (fplnl5 != "") {
-					me["FPLN_L5"].setColor(mcdu.MCDULines[i].output[4].getColor(i));
+					me["FPLN_L5"].setColor(mcdu.FPLNLines[i].output[4].getColor(i));
 					me["FPLN_L5"].setText(fplnl5);
 					me["FPLN_L5"].show();
 				} else {
 					me["FPLN_L5"].hide();
 				}
+				fplnl5s = mcdu.FPLNLines[i].output[4].getSubText();
+				if (fplnl5s != "") {
+					me["FPLN_L5S"].setText(fplnl5s);
+					me["FPLN_L5S"].show();
+				} else {
+					me["FPLN_L5S"].hide();
+				}
 			} else {
 				me["FPLN_L5"].hide();
+				me["FPLN_L5S"].hide();
 			}
 			
 			if (fplnLineSize >= 6) {
-				fplnl6 = mcdu.MCDULines[i].output[5].getText(i);
+				fplnl6 = mcdu.FPLNLines[i].output[5].getText();
 				if (fplnl6 != "") {
-					me["FPLN_L6"].setColor(mcdu.MCDULines[i].output[5].getColor(i));
+					me["FPLN_L6"].setColor(mcdu.FPLNLines[i].output[5].getColor(i));
 					me["FPLN_L6"].setText(fplnl6);
 					me["FPLN_L6"].show();
 				} else {
 					me["FPLN_L6"].hide();
 				}
+				fplnl6s = mcdu.FPLNLines[i].output[5].getSubText();
+				if (fplnl6s != "") {
+					me["FPLN_L6S"].setText(fplnl6s);
+					me["FPLN_L6S"].show();
+				} else {
+					me["FPLN_L6S"].hide();
+				}
 			} else {
 				me["FPLN_L6"].hide();
-			}
-			
-			fplnl1s = fplnL1s[i].getValue();
-			if (fplnl1s != "") {
-				me["FPLN_L1S"].setText(fplnl1s);
-				me["FPLN_L1S"].show();
-			} else {
-				me["FPLN_L1S"].hide();
-			}
-			
-			fplnl2s = fplnL2s[i].getValue();
-			if (fplnl2s != "") {
-				me["FPLN_L2S"].setText(fplnl2s);
-				me["FPLN_L2S"].show();
-			} else {
-				me["FPLN_L2S"].hide();
-			}
-			
-			fplnl3s = fplnL3s[i].getValue();
-			if (fplnl3s != "") {
-				me["FPLN_L3S"].setText(fplnl3s);
-				me["FPLN_L3S"].show();
-			} else {
-				me["FPLN_L3S"].hide();
-			}
-			
-			fplnl4s = fplnL4s[i].getValue();
-			if (fplnl4s != "") {
-				me["FPLN_L4S"].setText(fplnl4s);
-				me["FPLN_L4S"].show();
-			} else {
-				me["FPLN_L4S"].hide();
-			}
-			
-			fplnl5s = fplnL5s[i].getValue();
-			if (fplnl5s != "") {
-				me["FPLN_L5S"].setText(fplnl5s);
-				me["FPLN_L5S"].show();
-			} else {
-				me["FPLN_L5S"].hide();
-			}
-			
-			fplnl6s = fplnL6s[i].getValue();
-			if (fplnl6s != "") {
-				me["FPLN_L6S"].setText(fplnl6s);
-				me["FPLN_L6S"].show();
-			} else {
 				me["FPLN_L6S"].hide();
 			}
 			
-			if (showFromInd[i].getBoolValue()) {
+			if (mcdu.FPLNLines[i].index == 0) {
 				me["FPLN_From"].show();
 			} else {
 				me["FPLN_From"].hide();

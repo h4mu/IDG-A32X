@@ -32,7 +32,7 @@ var StaticText = {
 		in.type = type;
 		return in;
 	},
-	getText: func(i) {
+	getText: func() {
 		if (me.type == "discontinuity") {
 			return "---F-PLN DISCONTINUITY--";
 		} else if (me.type == "fplnEnd") {
@@ -43,8 +43,11 @@ var StaticText = {
 			return "------NO ALTN F-PLN-----";
 		}
 	},
-	getColor: func(i) {
+	getColor: func() {
 		return canvas_mcdu.WHITE;
+	},
+	getSubText: func() {
+		return "";
 	},
 	type: nil,
 	pushButtonLeft: func() {
@@ -55,18 +58,19 @@ var StaticText = {
 	},
 };
 
-var MCDUText = {
-	new: func(wp, dest) {
-		var in = {parents:[MCDUText]};
+var FPLNText = {
+	new: func(wp, dest, fp, wpIndex) {
+		var in = {parents:[FPLNText]};
 		in.wp = wp;
 		in.dest = dest;
+		in.fp = fp;
+		in.index = wpIndex;
 		return in;
 	},
-	getText: func(i) {
+	getText: func() {
 		return me.wp.wp_name;
 	},
 	getColor: func(i) {
-		
 		if (TMPYActive[i].getBoolValue()) {
 			if (me.dest) {
 				return canvas_mcdu.WHITE;
@@ -81,6 +85,9 @@ var MCDUText = {
 			}
 		}
 	},
+	getSubText: func() {
+		return "C" ~ sprintf("%03d", fmgc.wpCoursePrev[me.fp][me.index].getValue()) ~ "g"; # g is a degrees symbol in the MCDU font
+	},
 	wp: nil,
 	pushButtonLeft: func() {
 		
@@ -94,6 +101,8 @@ var FPLNLineComputer = {
 	new: func(mcdu) {
 		var in = {parents:[FPLNLineComputer]};
 		in.mcdu = mcdu;
+		in.planEnd = StaticText.new("fplnEnd");
+		in.planNoAlt = StaticText.new("noAltnFpln");
 		if (debug == 1) printf("%d: Line computer created.", in.mcdu);
 		return in;
 	},
@@ -106,41 +115,35 @@ var FPLNLineComputer = {
 	lines: nil,
 	output: [],
 	mcdu: nil,
+	fplnID: nil,
 	enableScroll: 0,
-	updatePlan: func(fpln) {
-		if (debug == 1) printf("oops, this method is not ready yet");
-		# Here you make the line instances and put them into me.planList
-		me.checkIndex();
-		me.updateScroll();
-	},
-	replacePlan: func(fpln, lines, destIndex) {
+	replacePlan: func(fplnID, lines, destIndex, firstLineIndex) {
 		# Here you set another plan, do this when changing plan on display or when destination changes
 		if (debug == 1) printf("%d: replacePlan called for %d lines and destIndex %d", me.mcdu, lines, destIndex);
+		fpln = fmgc.fp[fplnID]; # Get the Nasal Flightplan
 		me.planList = [];
 		for (var j = 0; j < fpln.getPlanSize(); j += 1) {
 			me.dest = 0;
 			if (j == destIndex) {
 				me.dest = 1;
 			}
-			append(me.planList, MCDUText.new(fpln.getWP(j), me.dest));
+			append(me.planList, FPLNText.new(fpln.getWP(j), me.dest, fplnID, j));
 		}
-		me.destination = MCDUText.new(fpln.getWP(destIndex), 1);
+		me.destination = FPLNText.new(fpln.getWP(destIndex), 1, fplnID, destIndex);
 		if (debug == 1) printf("%d: dest is: %s", me.mcdu, fpln.getWP(destIndex).wp_name);
-		me.planEnd = StaticText.new("fplnEnd");
-		me.planNoAlt = StaticText.new("noAltnFpln");
 		me.destIndex = destIndex;
-		me.initScroll(lines);
-	},
-	initScroll: func(lines) {
+		me.index = firstLineIndex;
 		me.lines = lines;
-		me.index = 0;
+		me.initScroll();
+	},
+	initScroll: func() {
 		me.maxItems = size(me.planList) + 2; # + 2 is for end of plan line and altn end of plan.
-		me.enableScroll = lines < me.maxItems;
+		me.enableScroll = me.lines < me.maxItems;
 		if (debug == 1) printf("%d: scroll is %d. Size of plan is %d", me.mcdu, me.enableScroll, size(me.planList));
 		me.updateScroll();
 	},
 	checkIndex: func() {
-		if (debug == 1) printf("oops, this method is not ready yet");
+		printf("oops, this method is not ready yet");
 		if (me.lines == MAIN) {
 			me.extra = 2;
 		} else {
@@ -159,7 +162,7 @@ var FPLNLineComputer = {
 			me.index = 0;
 		} else {
 			me.index += 1;
-			if (me.index > size(me.planList) + 1) {
+			if (me.index > size(me.planList) + 2 - me.lines) {
 				me.index = 0;
 			}
 		}
@@ -173,7 +176,7 @@ var FPLNLineComputer = {
 		} else {
 			me.index -= 1;
 			if (me.index < 0) {
-				me.index = size(me.planList) + 1;
+				me.index = size(me.planList) + 2 - me.lines;
 			}
 		}
 		me.updateScroll();
@@ -195,7 +198,7 @@ var FPLNLineComputer = {
 				if (debug == 1) printf("%d: added dest at bottom for total of %d lines", me.mcdu, size(me.output));
 				return;
 			} else if (size(me.output) < me.lines) {
-				for (i = me.realIndex+1; size(me.output) < me.lines and i < size(me.planList); i += 1) {
+				for (i = me.realIndex + 1; size(me.output) < me.lines and i < size(me.planList); i += 1) {
 					append(me.output, me.planList[i]);
 					me.realIndex = i;
 				}
@@ -225,164 +228,164 @@ var FPLNLineComputer = {
 	},
 };
 
-var MCDULines = [FPLNLineComputer.new(0), FPLNLineComputer.new(1)];
+var FPLNLines = [FPLNLineComputer.new(0), FPLNLineComputer.new(1)];
 
 # For testing purposes only -- do not touch!
 var test = func {
 	var fp = createFlightplan(getprop("sim/aircraft-dir")~"/plan.gpx");
 	var desti = int(fp.getPlanSize()*0.5);
-	MCDULines[0].replacePlan(fp,6,desti);
+	FPLNLines[0].replacePlan(fp,6,desti,0);
 	print("Display:");
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("down");MCDULines[0].scrollDown();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("down");FPLNLines[0].scrollDown();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("up");MCDULines[0].scrollUp();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("up");FPLNLines[0].scrollUp();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("up");MCDULines[0].scrollUp();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("up");FPLNLines[0].scrollUp();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("up");MCDULines[0].scrollUp();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("up");FPLNLines[0].scrollUp();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("up");MCDULines[0].scrollUp();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("up");FPLNLines[0].scrollUp();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("up");MCDULines[0].scrollUp();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("up");FPLNLines[0].scrollUp();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("up");MCDULines[0].scrollUp();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("up");FPLNLines[0].scrollUp();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("up");MCDULines[0].scrollUp();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("up");FPLNLines[0].scrollUp();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("up");MCDULines[0].scrollUp();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("up");FPLNLines[0].scrollUp();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("up");MCDULines[0].scrollUp();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("up");FPLNLines[0].scrollUp();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("up");MCDULines[0].scrollUp();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("up");FPLNLines[0].scrollUp();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("up");MCDULines[0].scrollUp();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("up");FPLNLines[0].scrollUp();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
-	print("up");MCDULines[0].scrollUp();
-	foreach(line;MCDULines[0].output) {
-		printf("line: %s",line.getText(0));
+	print("up");FPLNLines[0].scrollUp();
+	foreach(line;FPLNLines[0].output) {
+		printf("line: %s",line.getText());
 	}
 }
 
@@ -390,9 +393,9 @@ var test = func {
 
 var slewFPLN = func(d, i) { # Scrolling function. d is -1 or 1 for direction, and i is instance.
 	if (d == 1) {
-		MCDULines[i].scrollDown(); # Scroll Up in Thales Manual
+		FPLNLines[i].scrollDown(); # Scroll Up in Thales Manual
 	} else if (d == -1) {
-		MCDULines[i].scrollUp(); # Scroll Down in Thales Manual
+		FPLNLines[i].scrollUp(); # Scroll Down in Thales Manual
 	}
 }
 

@@ -1,4 +1,4 @@
-# Airbus A3XX MCDU
+# Airbus A3XX FMGC MCDU Bridge
 
 # Copyright (c) 2019 Joshua Davidson (it0uchpods)
 
@@ -24,18 +24,13 @@ var line5c = [props.globals.initNode("MCDU[0]/F-PLN/line-5c", "wht", "STRING"), 
 var line6c = [props.globals.initNode("MCDU[0]/F-PLN/line-6c", "wht", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/line-6c", "wht", "STRING")];
 var showFromInd = [props.globals.initNode("MCDU[0]/F-PLN/show-from", 0, "BOOL"), props.globals.initNode("MCDU[1]/F-PLN/show-from", 0, "BOOL")];
 
-var discontinuity =    "---F-PLN DISCONTINUITY--";
-var fpln_end =         "------END OF F-PLN------";
-var altn_fpln_end =    "----END OF ALTN F-PLN---";
-var no_altn_fpln_end = "------NO ALTN F-PLN-----";
-
+var TMPY = 5;
+var MAIN = 6;
 var num = 0;
 var page = "";
-var wpList = [["WP0", "WP1", "WP2", "WP3", "WP4", "WP5"], ["WP0", "WP1", "WP2", "WP3", "WP4", "WP5"]];
 var active_out = [nil, nil, props.globals.getNode("/FMGC/flightplan[2]/active")];
 var num_out = [props.globals.getNode("/FMGC/flightplan[0]/num"), props.globals.getNode("/FMGC/flightplan[1]/num"), props.globals.getNode("/FMGC/flightplan[2]/num")];
 var TMPYActive = [props.globals.getNode("/FMGC/internal/tmpy-active[0]"), props.globals.getNode("/FMGC/internal/tmpy-active[1]")];
-var TMPYActive_out = [props.globals.initNode("/MCDU[0]/tmpy-active", 0, "BOOL"), props.globals.initNode("/MCDU[1]/tmpy-active", 0, "BOOL")];
 var pageProp = [props.globals.getNode("/MCDU[0]/page", 1), props.globals.getNode("/MCDU[1]/page", 1)];
 
 # Create text items
@@ -75,14 +70,14 @@ var MCDUText = {
 		return in;
 	},
 	getText: func(i) {
-		if (TMPYActive_out[i].getBoolValue()) {
+		if (TMPYActive[i].getBoolValue()) {
 			left1[i].setValue(fmgc.wpID[i][me.wp].getValue());
 		} else {
 			left1[i].setValue(fmgc.wpID[2][me.wp].getValue());
 		}
 	},
 	getColor: func(i) {
-		if (TMPYActive_out[i].getBoolValue()) {
+		if (TMPYActive[i].getBoolValue()) {
 			if (me.wp == fmgc.arrivalAirportI[i]) {
 				return "wht";
 			} else {
@@ -105,35 +100,125 @@ var MCDUText = {
 	},
 };
 
-var slewFPLN = func(d, i) { # Scrolling function. d is -1 or 1 for direction, and i is instance.
-	
-}
+var FPLNLineComputer = {
+	new: func(mcdu) {
+		var in = {parents:[FPLNLineComputer]};
+		in.mcdu = mcdu;
+		printf("%d: Line computer created.",in.mcdu);
+		return in;
+	},
+	index: 0,
+	planList: [],
+	destination: nil,
+	destIndex: nil,
+	planEnd: nil,
+	lines: nil,
+	output: [],
+	mcdu: nil,
+	enableScroll: 0,
+	updatePlan: func(fpln) {
+		printf("oops, this method is not ready yet");
+		# Here you make the line instances and put them into me.planList
+		me.checkIndex();
+		me.updateScroll();
+	},
+	replacePlan: func(fpln, lines, destIndex) {
+		# Here you set another plan, do this when changing plan on display or when destination changes
+		printf("%d: replacePlan called", me.mcdu);
+		me.planList = [];
+		for (var j = 0; j < fpln.getPlanSize(); j += 1) {
+			append(me.planList, MCDUText.new(fpln.getWP(j)));
+		}
+		me.destination = MCDUText.new(fpln.getWP(destIndex));
+		me.planEnd = StaticText.new("fplnEnd");
+		me.destIndex = destIndex;
+		me.initScroll(lines);
+	},
+	initScroll: func(lines) {
+		me.lines = lines;
+		me.index = 0;
+		me.maxItems = size(me.planList) + 2; # + 2 is for end of plan line and no alternate flightplan
+		me.enableScroll = lines < me.maxItems;
+		printf("%d: scroll is %d. Number of WP is %d", me.mcdu, me.enableScroll, size(me.planList));
+		me.updateScroll();
+	},
+	checkIndex: func() {
+		printf("oops, this method is not ready yet");
+		if (me.lines == MAIN) {
+			me.extra = 2;
+		} else {
+			me.extra = 1
+		}
+		if (size(planList) < MAIN) {
+			me.index = 0;
+		} else if (me.index > size(planList) + me.extra + size(planList) - me.lines - 1) {
+			me.index = size(planList) + me.extra + size(planList) - me.lines - 1;
+		}
+	},
+	scrollDown: func() {
+		printf("%d: scroll down", me.mcdu);
+		me.extra = 1;
+		if (!me.enableScroll) {
+			me.index = 0;
+		} else {
+			me.index += 1;
+			if (me.index > size(planList)) {
+				me.index = 0;
+			}
+		}
+		me.updateScroll();
+	},
+	scrollUp: func() {
+		printf("%d: scroll up", me.mcdu);
+		me.extra = 1;
+		if (!me.enableScroll) {
+			me.index = 0;
+		} else {
+			me.index -= 1;
+			if (me.index < 0) {
+				me.index = size(planList);
+			}
+		}
+		me.updateScroll();
+	},
+	updateScroll: func() {
+		me.output = [];
+		if (me.index <= size(me.planList)) {
+			var i = 0;
+			printf("%d: updating display from index %d", me.mcdu, me.index);
+			for (i = me.index; i < math.min(size(me.planList), i + 5); i += 1) {
+				append(me.output, me.planList[i]);
+			}
+			printf("%d: populated until wp index %d", me.mcdu,i);
+			if (i < me.destIndex and me.lines == MAIN) {
+				# Destination has not been shown yet, now its time (if we show 6 lines)
+				append(me.output, me.destination);
+				printf("%d: added dest at bottom for total of %d lines", me.mcdu, size(me.output));
+				return;
+			} else if (size(me.output) < me.lines and (i == size(me.planList) - 1 or (me.enableScroll and i == size(me.planList)))) {
+				# Show the end of plan
+				append(me.output, me.planEnd);
+				printf("%d: added end", me.mcdu);
+				if (me.enableScroll and size(me.output) < me.lines) {
+					# We start wrapping
+					for (var j = 0; size(me.output) < me.lines; j += 1) {
+						append(me.output, me.planList[j]);
+					}
+					
+				}
+			}
+		}
+		printf("%d: %d lines", me.mcdu, size(me.output));
+	},
+};
 
-var updateFPLN = func(i) {
-	page = pageProp[i].getValue();
-	
-	if (active_out[2].getBoolValue()) {
-		left1[i].setValue(wpList[i][0]);
-		left2[i].setValue(wpList[i][1]);
-		left3[i].setValue(wpList[i][2]);
-		left4[i].setValue(wpList[i][3]);
-		left5[i].setValue(wpList[i][4]);
-		left6[i].setValue(wpList[i][5]);
-		TMPYActive_out[i].setBoolValue(TMPYActive[i].getBoolValue()); # Delayed, so that we only update the MCDU once text is set to prevent color mismatching.
-	} else {
-		left1[i].setValue("");
-		left1s[i].setValue("");
-		left2[i].setValue("");
-		left2s[i].setValue("");
-		left3[i].setValue("");
-		left3s[i].setValue("");
-		left4[i].setValue("");
-		left4s[i].setValue("");
-		left5[i].setValue("");
-		left5s[i].setValue("");
-		left6[i].setValue("");
-		left6s[i].setValue("");
-		TMPYActive_out[i].setBoolValue(0);
+var MCDULines = [FPLNLineComputer.new(0), FPLNLineComputer.new(1)];
+
+var slewFPLN = func(d, i) { # Scrolling function. d is -1 or 1 for direction, and i is instance.
+	if (d == 1) {
+		MCDULines[i].scrollUp();
+	} else if (d == 0) {
+		MCDULines[i].scrollDown();
 	}
 }
 

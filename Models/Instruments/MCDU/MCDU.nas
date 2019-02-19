@@ -11,6 +11,7 @@ var symbol = "helvetica_medium.txf";
 var normal = 70;
 var small = 56;
 var page = "";
+var fplnLineSize = 0;
 var fplnl1 = "";
 var fplnl1s = "";
 var fplnl2 = "";
@@ -104,18 +105,12 @@ var engOutAcc = props.globals.getNode("/FMGC/internal/eng-out-reduc", 1);
 var engOutAccSet = props.globals.getNode("/MCDUC/reducacc-set", 1);
 var transAlt = props.globals.getNode("/FMGC/internal/trans-alt", 1);
 var managedSpeed = props.globals.getNode("/it-autoflight/input/spd-managed", 1);
-var TMPYActive = props.globals.getNode("/MCDUC/tmpy-active", 1);
+var TMPYActive = [props.globals.getNode("/FMGC/internal/tmpy-active[0]"), props.globals.getNode("/FMGC/internal/tmpy-active[1]")];
 
 # Fetch nodes into vectors
 var pageProp = [props.globals.getNode("/MCDU[0]/page", 1), props.globals.getNode("/MCDU[1]/page", 1)];
 var active = [props.globals.getNode("/MCDU[0]/active", 1), props.globals.getNode("/MCDU[1]/active", 1)];
 var scratchpad = [props.globals.getNode("/MCDU[0]/scratchpad", 1), props.globals.getNode("/MCDU[1]/scratchpad", 1)];
-var fplnL1 = [props.globals.getNode("/MCDU[0]/F-PLN/left-1", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-1", 1)];
-var fplnL2 = [props.globals.getNode("/MCDU[0]/F-PLN/left-2", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-2", 1)];
-var fplnL3 = [props.globals.getNode("/MCDU[0]/F-PLN/left-3", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-3", 1)];
-var fplnL4 = [props.globals.getNode("/MCDU[0]/F-PLN/left-4", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-4", 1)];
-var fplnL5 = [props.globals.getNode("/MCDU[0]/F-PLN/left-5", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-5", 1)];
-var fplnL6 = [props.globals.getNode("/MCDU[0]/F-PLN/left-6", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-6", 1)];
 var fplnL1s = [props.globals.getNode("/MCDU[0]/F-PLN/left-1s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-1s", 1)];
 var fplnL2s = [props.globals.getNode("/MCDU[0]/F-PLN/left-2s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-2s", 1)];
 var fplnL3s = [props.globals.getNode("/MCDU[0]/F-PLN/left-3s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-3s", 1)];
@@ -223,50 +218,76 @@ var canvas_MCDU_base = {
 				me["FPLN_Callsign"].hide();
 			}
 			
-			fplnl1 = fplnL1[i].getValue();
-			if (fplnl1 != "") {
-				me["FPLN_L1"].setText(fplnl1);
-				me["FPLN_L1"].show();
+			fplnLineSize = size(mcdu.MCDULines[i].output);
+			
+			if (fplnLineSize >= 1) {
+				fplnl1 = mcdu.MCDULines[i].output[0].getText(i);
+				if (fplnl1 != "") {
+					me["FPLN_L1"].setText(fplnl1);
+					me["FPLN_L1"].show();
+				} else {
+					me["FPLN_L1"].hide();
+				}
 			} else {
 				me["FPLN_L1"].hide();
 			}
 			
-			fplnl2 = fplnL2[i].getValue();
-			if (fplnl2 != "") {
-				me["FPLN_L2"].setText(fplnl2);
-				me["FPLN_L2"].show();
+			if (fplnLineSize >= 2) {
+				fplnl2 = mcdu.MCDULines[i].output[1].getText(i);
+				if (fplnl2 != "") {
+					me["FPLN_L2"].setText(fplnl2);
+					me["FPLN_L2"].show();
+				} else {
+					me["FPLN_L2"].hide();
+				}
 			} else {
 				me["FPLN_L2"].hide();
 			}
 			
-			fplnl3 = fplnL3[i].getValue();
-			if (fplnl3 != "") {
-				me["FPLN_L3"].setText(fplnl3);
-				me["FPLN_L3"].show();
+			if (fplnLineSize >= 3) {
+				fplnl3 = mcdu.MCDULines[i].output[2].getText(i);
+				if (fplnl3 != "") {
+					me["FPLN_L3"].setText(fplnl3);
+					me["FPLN_L3"].show();
+				} else {
+					me["FPLN_L3"].hide();
+				}
 			} else {
 				me["FPLN_L3"].hide();
 			}
 			
-			fplnl4 = fplnL4[i].getValue();
-			if (fplnl4 != "") {
-				me["FPLN_L4"].setText(fplnl4);
-				me["FPLN_L4"].show();
+			if (fplnLineSize >= 4) {
+				fplnl4 = mcdu.MCDULines[i].output[3].getText(i);
+				if (fplnl4 != "") {
+					me["FPLN_L4"].setText(fplnl4);
+					me["FPLN_L4"].show();
+				} else {
+					me["FPLN_L4"].hide();
+				}
 			} else {
 				me["FPLN_L4"].hide();
 			}
 			
-			fplnl5 = fplnL5[i].getValue();
-			if (fplnl5 != "") {
-				me["FPLN_L5"].setText(fplnl5);
-				me["FPLN_L5"].show();
+			if (fplnLineSize >= 5) {
+				fplnl5 = mcdu.MCDULines[i].output[4].getText(i);
+				if (fplnl5 != "") {
+					me["FPLN_L5"].setText(fplnl5);
+					me["FPLN_L5"].show();
+				} else {
+					me["FPLN_L5"].hide();
+				}
 			} else {
 				me["FPLN_L5"].hide();
 			}
 			
-			fplnl6 = fplnL6[i].getValue();
-			if (fplnl6 != "") {
-				me["FPLN_L6"].setText(fplnl6);
-				me["FPLN_L6"].show();
+			if (fplnLineSize >= 6) {
+				fplnl6 = mcdu.MCDULines[i].output[5].getText(i);
+				if (fplnl6 != "") {
+					me["FPLN_L6"].setText(fplnl6);
+					me["FPLN_L6"].show();
+				} else {
+					me["FPLN_L6"].hide();
+				}
 			} else {
 				me["FPLN_L6"].hide();
 			}
@@ -325,7 +346,7 @@ var canvas_MCDU_base = {
 				me["FPLN_From"].hide();
 			}
 			
-			if (TMPYActive.getBoolValue()) {
+			if (TMPYActive[i].getBoolValue()) {
 				me["FPLN_TMPY_group"].show();
 				me["FPLN_6_group"].hide();
 			} else {

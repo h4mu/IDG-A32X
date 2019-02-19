@@ -259,9 +259,6 @@ var flightplan = {
 				}
 			}
 		}
-		
-		mcdu.updateFPLN(0);
-		mcdu.updateFPLN(1);
 	},
 };
 

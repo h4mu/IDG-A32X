@@ -391,10 +391,8 @@ var test = func {
 var slewFPLN = func(d, i) { # Scrolling function. d is -1 or 1 for direction, and i is instance.
 	if (d == 1) {
 		MCDULines[i].scrollDown(); # Scroll Up in Thales Manual
-		print("scrollDown()");
 	} else if (d == -1) {
 		MCDULines[i].scrollUp(); # Scroll Down in Thales Manual
-		print("scrollUp()");
 	}
 }
 

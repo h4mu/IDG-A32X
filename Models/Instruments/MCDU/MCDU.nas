@@ -40,6 +40,12 @@ setprop("/MCDUC/colors/yel/r", 0.9333);
 setprop("/MCDUC/colors/yel/g", 0.9333);
 setprop("/MCDUC/colors/yel/b", 0.0000);
 
+var WHITE = [1.0000,1.0000,1.0000];
+var GREEN = [0.0509,0.7529,0.2941];
+var BLUE = [0.0901,0.6039,0.7176];
+var AMBER = [0.7333,0.3803,0.0000];
+var YELLOW = [0.9333,0.9333,0.0000];
+
 # Fetch nodes:
 var ac1 = props.globals.getNode("/systems/electrical/bus/ac1", 1);
 var ac2 = props.globals.getNode("/systems/electrical/bus/ac2", 1);
@@ -117,17 +123,10 @@ var fplnL3s = [props.globals.getNode("/MCDU[0]/F-PLN/left-3s", 1), props.globals
 var fplnL4s = [props.globals.getNode("/MCDU[0]/F-PLN/left-4s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-4s", 1)];
 var fplnL5s = [props.globals.getNode("/MCDU[0]/F-PLN/left-5s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-5s", 1)];
 var fplnL6s = [props.globals.getNode("/MCDU[0]/F-PLN/left-6s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-6s", 1)];
-var fpln1c = [props.globals.getNode("/MCDU[0]/F-PLN/line-1c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-1c", 1)];
-var fpln2c = [props.globals.getNode("/MCDU[0]/F-PLN/line-2c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-2c", 1)];
-var fpln3c = [props.globals.getNode("/MCDU[0]/F-PLN/line-3c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-3c", 1)];
-var fpln4c = [props.globals.getNode("/MCDU[0]/F-PLN/line-4c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-4c", 1)];
-var fpln5c = [props.globals.getNode("/MCDU[0]/F-PLN/line-5c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-5c", 1)];
-var fpln6c = [props.globals.getNode("/MCDU[0]/F-PLN/line-6c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-6c", 1)];
 var showFromInd = [props.globals.getNode("MCDU[0]/F-PLN/show-from", 1), props.globals.getNode("MCDU[1]/F-PLN/show-from", 1)];
 
 # Create Nodes:
 var pageSwitch = [props.globals.initNode("/MCDU[0]/internal/switch", 0, "BOOL"), props.globals.initNode("/MCDU[1]/internal/switch", 0, "BOOL")];
-var fplnCSwitch = [props.globals.initNode("/MCDU[0]/internal/fpln-c-switch", 0, "BOOL"), props.globals.initNode("/MCDU[1]/internal/fpln-c-switch", 0, "BOOL")];
 
 var canvas_MCDU_base = {
 	init: func(canvas_group, file) {
@@ -223,6 +222,7 @@ var canvas_MCDU_base = {
 			if (fplnLineSize >= 1) {
 				fplnl1 = mcdu.MCDULines[i].output[0].getText(i);
 				if (fplnl1 != "") {
+					me["FPLN_L1"].setColor(mcdu.MCDULines[i].output[0].getColor(i));
 					me["FPLN_L1"].setText(fplnl1);
 					me["FPLN_L1"].show();
 				} else {
@@ -235,6 +235,7 @@ var canvas_MCDU_base = {
 			if (fplnLineSize >= 2) {
 				fplnl2 = mcdu.MCDULines[i].output[1].getText(i);
 				if (fplnl2 != "") {
+					me["FPLN_L2"].setColor(mcdu.MCDULines[i].output[1].getColor(i));
 					me["FPLN_L2"].setText(fplnl2);
 					me["FPLN_L2"].show();
 				} else {
@@ -247,6 +248,7 @@ var canvas_MCDU_base = {
 			if (fplnLineSize >= 3) {
 				fplnl3 = mcdu.MCDULines[i].output[2].getText(i);
 				if (fplnl3 != "") {
+					me["FPLN_L3"].setColor(mcdu.MCDULines[i].output[2].getColor(i));
 					me["FPLN_L3"].setText(fplnl3);
 					me["FPLN_L3"].show();
 				} else {
@@ -259,6 +261,7 @@ var canvas_MCDU_base = {
 			if (fplnLineSize >= 4) {
 				fplnl4 = mcdu.MCDULines[i].output[3].getText(i);
 				if (fplnl4 != "") {
+					me["FPLN_L4"].setColor(mcdu.MCDULines[i].output[3].getColor(i));
 					me["FPLN_L4"].setText(fplnl4);
 					me["FPLN_L4"].show();
 				} else {
@@ -271,6 +274,7 @@ var canvas_MCDU_base = {
 			if (fplnLineSize >= 5) {
 				fplnl5 = mcdu.MCDULines[i].output[4].getText(i);
 				if (fplnl5 != "") {
+					me["FPLN_L5"].setColor(mcdu.MCDULines[i].output[4].getColor(i));
 					me["FPLN_L5"].setText(fplnl5);
 					me["FPLN_L5"].show();
 				} else {
@@ -283,6 +287,7 @@ var canvas_MCDU_base = {
 			if (fplnLineSize >= 6) {
 				fplnl6 = mcdu.MCDULines[i].output[5].getText(i);
 				if (fplnl6 != "") {
+					me["FPLN_L6"].setColor(mcdu.MCDULines[i].output[5].getColor(i));
 					me["FPLN_L6"].setText(fplnl6);
 					me["FPLN_L6"].show();
 				} else {
@@ -352,11 +357,6 @@ var canvas_MCDU_base = {
 			} else {
 				me["FPLN_TMPY_group"].hide();
 				me["FPLN_6_group"].show();
-			}
-			
-			if (fplnCSwitch[i].getBoolValue() != 1) {
-				me.FPLNcolor(fpln1c[i].getValue(), fpln2c[i].getValue(), fpln3c[i].getValue(), fpln4c[i].getValue(), fpln5c[i].getValue(), fpln6c[i].getValue());
-				fplnCSwitch[i].setBoolValue(1);
 			}
 		} else if (page == "MCDU") {
 			if (!pageSwitch[i].getBoolValue()) {
@@ -1776,14 +1776,6 @@ var canvas_MCDU_base = {
 			me["Simple_C6S"].setColor(getprop("/MCDUC/colors/" ~ f ~ "/r"), getprop("/MCDUC/colors/" ~ f ~ "/g"), getprop("/MCDUC/colors/" ~ f ~ "/b"));
 		}
 	},
-	FPLNcolor: func(a, b, c, d, e, f) {
-		me["FPLN_L1"].setColor(getprop("/MCDUC/colors/" ~ a ~ "/r"), getprop("/MCDUC/colors/" ~ a ~ "/g"), getprop("/MCDUC/colors/" ~ a ~ "/b"));
-		me["FPLN_L2"].setColor(getprop("/MCDUC/colors/" ~ b ~ "/r"), getprop("/MCDUC/colors/" ~ b ~ "/g"), getprop("/MCDUC/colors/" ~ b ~ "/b"));
-		me["FPLN_L3"].setColor(getprop("/MCDUC/colors/" ~ c ~ "/r"), getprop("/MCDUC/colors/" ~ c ~ "/g"), getprop("/MCDUC/colors/" ~ c ~ "/b"));
-		me["FPLN_L4"].setColor(getprop("/MCDUC/colors/" ~ d ~ "/r"), getprop("/MCDUC/colors/" ~ d ~ "/g"), getprop("/MCDUC/colors/" ~ d ~ "/b"));
-		me["FPLN_L5"].setColor(getprop("/MCDUC/colors/" ~ e ~ "/r"), getprop("/MCDUC/colors/" ~ e ~ "/g"), getprop("/MCDUC/colors/" ~ e ~ "/b"));
-		me["FPLN_L6"].setColor(getprop("/MCDUC/colors/" ~ f ~ "/r"), getprop("/MCDUC/colors/" ~ f ~ "/g"), getprop("/MCDUC/colors/" ~ f ~ "/b"));
-	},
 	# 0 = ignore
 	fontLeft: func (a, b, c, d, e, f) {
 		if (a != 0) {
@@ -1989,82 +1981,8 @@ var showMCDU2 = func {
 
 setlistener("/MCDU[0]/page", func {
 	pageSwitch[0].setBoolValue(0);
-	fplnCSwitch[0].setBoolValue(0);
 }, 0, 0);
 
 setlistener("/MCDU[1]/page", func {
 	pageSwitch[1].setBoolValue(0);
-	fplnCSwitch[1].setBoolValue(0);
-}, 0, 0);
-
-setlistener("/MCDU[0]/F-PLN/line-1c", func {
-	if (pageProp[0].getValue() == "F-PLNA" or pageProp[0].getValue() == "F-PLNB") {
-		fplnCSwitch[0].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[0]/F-PLN/line-2c", func {
-	if (pageProp[0].getValue() == "F-PLNA" or pageProp[0].getValue() == "F-PLNB") {
-		fplnCSwitch[0].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[0]/F-PLN/line-3c", func {
-	if (pageProp[0].getValue() == "F-PLNA" or pageProp[0].getValue() == "F-PLNB") {
-		fplnCSwitch[0].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[0]/F-PLN/line-4c", func {
-	if (pageProp[0].getValue() == "F-PLNA" or pageProp[0].getValue() == "F-PLNB") {
-		fplnCSwitch[0].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[0]/F-PLN/line-5c", func {
-	if (pageProp[0].getValue() == "F-PLNA" or pageProp[0].getValue() == "F-PLNB") {
-		fplnCSwitch[0].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[0]/F-PLN/line-6c", func {
-	if (pageProp[0].getValue() == "F-PLNA" or pageProp[0].getValue() == "F-PLNB") {
-		fplnCSwitch[0].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[1]/F-PLN/line-1c", func {
-	if (pageProp[1].getValue() == "F-PLNA" or pageProp[1].getValue() == "F-PLNB") {
-		fplnCSwitch[1].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[1]/F-PLN/line-2c", func {
-	if (pageProp[1].getValue() == "F-PLNA" or pageProp[1].getValue() == "F-PLNB") {
-		fplnCSwitch[1].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[1]/F-PLN/line-3c", func {
-	if (pageProp[1].getValue() == "F-PLNA" or pageProp[1].getValue() == "F-PLNB") {
-		fplnCSwitch[1].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[1]/F-PLN/line-4c", func {
-	if (pageProp[1].getValue() == "F-PLNA" or pageProp[1].getValue() == "F-PLNB") {
-		fplnCSwitch[1].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[1]/F-PLN/line-5c", func {
-	if (pageProp[1].getValue() == "F-PLNA" or pageProp[1].getValue() == "F-PLNB") {
-		fplnCSwitch[1].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[1]/F-PLN/line-6c", func {
-	if (pageProp[1].getValue() == "F-PLNA" or pageProp[1].getValue() == "F-PLNB") {
-		fplnCSwitch[1].setBoolValue(0);
-	}
 }, 0, 0);

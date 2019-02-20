@@ -42,6 +42,7 @@ var StaticText = {
 	},
 	type: nil,
 	pushButtonLeft: func() {
+		print(me.computer.mcdu ~ "statictext");
 		notAllowed(me.computer.mcdu);
 	},
 	pushButtonRight: func() {
@@ -94,6 +95,10 @@ var FPLNText = {
 	},
 	wp: nil,
 	pushButtonLeft: func() {
+		print(me.computer.mcdu ~ "fplntext");
+		if (me.computer.lines == MAIN) {
+			fmgc.flightplan.initTempFP(me.computer.mcdu, 2);
+		}
 		var scratchpad = getprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad");
 		if (scratchpad == "CLR") {
 			if (fmgc.flightplan.deleteWP(me.index, me.computer.mcdu) != 0) {
@@ -122,7 +127,7 @@ var FPLNText = {
 					setprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad", "");
 				}
 			} else {
-				notAllowed(me.computer.mcdu);
+				formatError(me.computer.mcdu);
 			}
 		}
 	},
@@ -135,8 +140,8 @@ var FPLNLineComputer = {
 	new: func(mcdu) {
 		var in = {parents:[FPLNLineComputer]};
 		in.mcdu = mcdu;
-		in.planEnd = StaticText.new(me, "fplnEnd");
-		in.planNoAlt = StaticText.new(me, "noAltnFpln");
+		in.planEnd = StaticText.new(in, "fplnEnd");
+		in.planNoAlt = StaticText.new(in, "noAltnFpln");
 		if (debug == 1) printf("%d: Line computer created.", in.mcdu);
 		return in;
 	},
@@ -298,9 +303,6 @@ var FPLNButton = func(s, key, i) {
 			TMPYActive[i].setBoolValue(0);
 		} else {
 			if (size(FPLNLines[i].output) >= key) {
-				if (!TMPYActive[i].getBoolValue()) {
-					fmgc.flightplan.initTempFP(i, 2);
-				}
 				FPLNLines[i].output[key - 1].pushButtonLeft();
 			}
 		}
@@ -317,9 +319,11 @@ var FPLNButton = func(s, key, i) {
 }
 
 var notInDataBase = func(i) {
-	if (getprop("/MCDU[" ~ i ~ "]/scratchpad") != "NOT IN DATABASE") {
-		setprop("/MCDU[" ~ i ~ "]/last-scratchpad", getprop("/MCDU[" ~ i ~ "]/scratchpad"));
-	}
+		if (getprop("/MCDU[" ~ i ~ "]/scratchpad-msg") == 1) { # Messages clear after NOT IN DATABASE
+			setprop("/MCDU[" ~ i ~ "]/last-scratchpad", "NOT IN DATABASE");
+		} else {
+			setprop("/MCDU[" ~ i ~ "]/last-scratchpad", getprop("/MCDU[" ~ i ~ "]/scratchpad"));
+		}
 	setprop("/MCDU[" ~ i ~ "]/scratchpad-msg", 1);
 	setprop("/MCDU[" ~ i ~ "]/scratchpad", "NOT IN DATABASE");
 }

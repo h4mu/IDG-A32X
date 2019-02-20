@@ -81,6 +81,15 @@ var flightplan = {
 		TMPYActive[f].setBoolValue(1);
 		me.checkWPOutputs(f);
 	},
+	eraseTempFP: func(f, n) { # f is temp, n is active
+		TMPYActive[f].setBoolValue(0);
+		if (f == 0) {
+			me.reset0();
+		} else if (f == 1) {
+			me.reset1();
+		}
+		me.checkWPOutputs(n);
+	},
 	executeTempFP: func(f, n) { # f is temp, n is active
 		fp[n] = fp[f].clone();
 		TMPYActive[f].setBoolValue(0);

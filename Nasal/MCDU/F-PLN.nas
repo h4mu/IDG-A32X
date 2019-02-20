@@ -303,7 +303,7 @@ var FPLNButton = func(s, key, i) {
 	var scratchpad = getprop("/MCDU[" ~ i ~ "]/scratchpad");
 	if (s == "L") {
 		if (key == 6 and TMPYActive[i].getBoolValue()) {
-			TMPYActive[i].setBoolValue(0);
+			fmgc.flightplan.eraseTempFP(i, 2);
 		} else {
 			if (scratchpad != "") {
 				if (size(FPLNLines[i].output) >= key) {

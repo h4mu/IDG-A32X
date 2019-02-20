@@ -78,18 +78,18 @@ var flightplan = {
 	},
 	initTempFP: func(f, n) { # f is temp, n is active
 		fp[f] = fp[n].clone();
-		me.checkWPOutputs(f);
 		TMPYActive[f].setBoolValue(1);
+		me.checkWPOutputs(f);
 	},
 	executeTempFP: func(f, n) { # f is temp, n is active
 		fp[n] = fp[f].clone();
-		me.checkWPOutputs(n);
 		TMPYActive[f].setBoolValue(0);
 		if (f == 0) {
 			me.reset0();
 		} else if (f == 1) {
 			me.reset1();
 		}
+		me.checkWPOutputs(n);
 	},
 	updateARPT: func(dep, arr, n) {
 		if (n == 2) { # Which flightplan?
@@ -172,6 +172,14 @@ var flightplan = {
 			append(wpDistance[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/distance", 0, "DOUBLE"));
 			append(wpCoursePrev[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/course-from-prev", 0, "DOUBLE"));
 			append(wpDistancePrev[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/distance-from-prev", 0, "DOUBLE"));
+		}
+		me.outputProps(); # Make sure everything is updated before we update the MCDUs.
+		for (var i = 0; i < 2; i += 1) { # Update the 2 MCDUs
+			if (n == 0 or n == 1) {
+				mcdu.FPLNLines[i].replacePlan(n, mcdu.TMPY, mcdu.FPLNLines[i].index);
+			} else {
+				mcdu.FPLNLines[i].replacePlan(n, mcdu.MAIN, mcdu.FPLNLines[i].index);
+			}
 		}
 		canvas_nd.A3XXRouteDriver.triggerSignal("fp-added"); # Update the NDs
 	},

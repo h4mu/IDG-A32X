@@ -147,27 +147,27 @@ var FPLNLineComputer = {
 	},
 	replacePlan: func(fplnID, lines, firstLineIndex) {
 		# Here you set another plan, do this when changing plan on display or when destination changes
-		if (debug == 1) printf("%d: replacePlan called for %d lines and me.destIndex %d", me.mcdu, lines, destIndex);
+		if (debug == 1) printf("%d: replacePlan called for %d lines and firstLine %d", me.mcdu, lines, firstLineIndex);
 		var fpln = nil;
+		
+		me.planList = [];
+		
 		if (!fmgc.active_out[2].getBoolValue()) {
-			fpln = createFlightplan();
 			me.destIndex = -1;
 			me.destination = nil;
 		} else {
 			fpln = fmgc.fp[fplnID]; # Get the Nasal Flightplan
 			me.destIndex = fmgc.arrivalAirportI[fplnID];
 			me.destination = FPLNText.new(fpln.getWP(me.destIndex), 1, fplnID, me.destIndex);
-		}
-		me.planList = [];
-		for (var j = 0; j < fpln.getPlanSize(); j += 1) {
-			me.dest = 0;
-			if (j == me.destIndex) {
-				me.dest = 1;
+			for (var j = 0; j < fpln.getPlanSize(); j += 1) {
+				me.dest = 0;
+				if (j == me.destIndex) {
+					me.dest = 1;
+				}
+				append(me.planList, FPLNText.new(fpln.getWP(j), me.dest, fplnID, j));
 			}
-			append(me.planList, FPLNText.new(fpln.getWP(j), me.dest, fplnID, j));
-		}		
-		if (debug == 1) printf("%d: dest is: %s", me.mcdu, fpln.getWP(me.destIndex).wp_name);
-		
+			if (debug == 1) printf("%d: dest is: %s", me.mcdu, fpln.getWP(me.destIndex).wp_name);
+		}
 		me.index = firstLineIndex;
 		me.lines = lines;
 		me.initScroll();
@@ -175,20 +175,17 @@ var FPLNLineComputer = {
 	initScroll: func() {
 		me.maxItems = size(me.planList) + 2; # + 2 is for end of plan line and altn end of plan.
 		me.enableScroll = me.lines < me.maxItems;
+		me.checkIndex();
 		if (debug == 1) printf("%d: scroll is %d. Size of plan is %d", me.mcdu, me.enableScroll, size(me.planList));
 		me.updateScroll();
 	},
 	checkIndex: func() {
-		printf("oops, this method is not ready yet");
-		if (me.lines == MAIN) {
-			me.extra = 2;
-		} else {
-			me.extra = 1
-		}
-		if (size(planList) < MAIN) {
+		if (!me.enableScroll) {
 			me.index = 0;
-		} else if (me.index > size(planList) + me.extra + size(planList) - me.lines - 1) {
-			me.index = size(planList) + me.extra + size(planList) - me.lines - 1;
+			if (debug == 1) printf("%d: index forced to 0",me.mcdu);
+		} elsif (me.index > size(me.planList) + 2 - me.lines) {
+			me.index = size(me.planList) + 2 - me.lines;
+			if (debug == 1) printf("%d: index forced to %d",me.mcdu,me.index);
 		}
 	},
 	scrollDown: func() { # Scroll Up in Thales Manual
@@ -266,6 +263,31 @@ var FPLNLineComputer = {
 
 var FPLNLines = [FPLNLineComputer.new(0), FPLNLineComputer.new(1)];
 clearFPLNComputer(); # Just in case, we have it in the clear state.
+
+var slewFPLN = func(d, i) { # Scrolling function. d is -1 or 1 for direction, and i is instance.
+	if (d == 1) {
+		FPLNLines[i].scrollDown(); # Scroll Up in Thales Manual
+	} else if (d == -1) {
+		FPLNLines[i].scrollUp(); # Scroll Down in Thales Manual
+	}
+}
+
+# Button and Inputs
+var FPLNButton = func(s, key, i) {
+	if (s == "L") {
+		
+	} else if (s == "R") {
+		
+	}
+}
+
+var notInDataBase = func(i) {
+	if (getprop("/MCDU[" ~ i ~ "]/scratchpad") != "NOT IN DATABASE") {
+		setprop("/MCDU[" ~ i ~ "]/last-scratchpad", getprop("/MCDU[" ~ i ~ "]/scratchpad"));
+	}
+	setprop("/MCDU[" ~ i ~ "]/scratchpad-msg", 1);
+	setprop("/MCDU[" ~ i ~ "]/scratchpad", "NOT IN DATABASE");
+}
 
 # For testing purposes only -- do not touch!
 var test = func {
@@ -427,28 +449,3 @@ var test = func {
 }
 
 #test();
-
-var slewFPLN = func(d, i) { # Scrolling function. d is -1 or 1 for direction, and i is instance.
-	if (d == 1) {
-		FPLNLines[i].scrollDown(); # Scroll Up in Thales Manual
-	} else if (d == -1) {
-		FPLNLines[i].scrollUp(); # Scroll Down in Thales Manual
-	}
-}
-
-# Button and Inputs
-var FPLNButton = func(s, key, i) {
-	if (s == "L") {
-		
-	} else if (s == "R") {
-		
-	}
-}
-
-var notInDataBase = func(i) {
-	if (getprop("/MCDU[" ~ i ~ "]/scratchpad") != "NOT IN DATABASE") {
-		setprop("/MCDU[" ~ i ~ "]/last-scratchpad", getprop("/MCDU[" ~ i ~ "]/scratchpad"));
-	}
-	setprop("/MCDU[" ~ i ~ "]/scratchpad-msg", 1);
-	setprop("/MCDU[" ~ i ~ "]/scratchpad", "NOT IN DATABASE");
-}

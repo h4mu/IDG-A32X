@@ -3,20 +3,6 @@
 # Copyright (c) 2019 Joshua Davidson (it0uchpods) and Nikolai V. Chr. (Necolatis)
 
 # Lowercase "g" is a degree symbol in the MCDU font.
-# wht = white, grn = green, blu = blue, amb = amber, yel = yellow
-var left1 = [props.globals.initNode("MCDU[0]/F-PLN/left-1", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-1", "", "STRING")];
-var left2 = [props.globals.initNode("MCDU[0]/F-PLN/left-2", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-2", "", "STRING")];
-var left3 = [props.globals.initNode("MCDU[0]/F-PLN/left-3", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-3", "", "STRING")];
-var left4 = [props.globals.initNode("MCDU[0]/F-PLN/left-4", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-4", "", "STRING")];
-var left5 = [props.globals.initNode("MCDU[0]/F-PLN/left-5", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-5", "", "STRING")];
-var left6 = [props.globals.initNode("MCDU[0]/F-PLN/left-6", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-6", "", "STRING")];
-var left1s = [props.globals.initNode("MCDU[0]/F-PLN/left-1s", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-1s", "", "STRING")];
-var left2s = [props.globals.initNode("MCDU[0]/F-PLN/left-2s", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-2s", "", "STRING")];
-var left3s = [props.globals.initNode("MCDU[0]/F-PLN/left-3s", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-3s", "", "STRING")];
-var left4s = [props.globals.initNode("MCDU[0]/F-PLN/left-4s", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-4s", "", "STRING")];
-var left5s = [props.globals.initNode("MCDU[0]/F-PLN/left-5s", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-5s", "", "STRING")];
-var left6s = [props.globals.initNode("MCDU[0]/F-PLN/left-6s", "", "STRING"), props.globals.initNode("MCDU[1]/F-PLN/left-6s", "", "STRING")];
-var showFromInd = [props.globals.initNode("MCDU[0]/F-PLN/show-from", 0, "BOOL"), props.globals.initNode("MCDU[1]/F-PLN/show-from", 0, "BOOL")];
 
 var TMPY = 5;
 var MAIN = 6;
@@ -31,9 +17,10 @@ var clearFPLNComputer = func {
 }
 
 var StaticText = {
-	new: func(type) {
+	new: func(computer, type) {
 		var in = {parents:[StaticText]};
 		in.type = type;
+		in.computer = computer;
 		return in;
 	},
 	getText: func() {
@@ -55,20 +42,21 @@ var StaticText = {
 	},
 	type: nil,
 	pushButtonLeft: func() {
-		
+		notAllowed(me.computer.mcdu);
 	},
 	pushButtonRight: func() {
-		
+		notAllowed(me.computer.mcdu);
 	},
 };
 
 var FPLNText = {
-	new: func(wp, dest, fp, wpIndex) {
+	new: func(computer, wp, dest, fp, wpIndex) {
 		var in = {parents:[FPLNText]};
 		in.wp = wp;
 		in.dest = dest;
 		in.fp = fp;
 		in.index = wpIndex;
+		in.computer = computer;
 		return in;
 	},
 	getText: func() {
@@ -106,10 +94,40 @@ var FPLNText = {
 	},
 	wp: nil,
 	pushButtonLeft: func() {
-		
+		var scratchpad = getprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad");
+		if (scratchpad == "CLR") {
+			if (fmgc.flightplan.deleteWP(me.index, me.computer.mcdu) != 0) {
+				notAllowed(me.computer.mcdu);
+			} else {
+				setprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad-msg", 0);
+				setprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad", "");
+			}
+		} else {
+			if (size(scratchpad) == 5) {
+				if (fmgc.flightplan.insertFix(scratchpad, me.index, me.computer.mcdu) != 0) {
+					notInDataBase(me.computer.mcdu);
+				} else {
+					setprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad", "");
+				}
+			} else if (size(scratchpad) == 4) {
+				if (fmgc.flightplan.insertArpt(scratchpad, me.index, me.computer.mcdu) != 0) {
+					notInDataBase(me.computer.mcdu);
+				} else {
+					setprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad", "");
+				}
+			} else if (size(scratchpad) == 3) {
+				if (fmgc.flightplan.insertNavaid(scratchpad, me.index, me.computer.mcdu) != 0) {
+					notInDataBase(me.computer.mcdu);
+				} else {
+					setprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad", "");
+				}
+			} else {
+				notAllowed(me.computer.mcdu);
+			}
+		}
 	},
 	pushButtonRight: func() {
-		
+		notAllowed(me.computer.mcdu);
 	},
 };
 
@@ -117,8 +135,8 @@ var FPLNLineComputer = {
 	new: func(mcdu) {
 		var in = {parents:[FPLNLineComputer]};
 		in.mcdu = mcdu;
-		in.planEnd = StaticText.new("fplnEnd");
-		in.planNoAlt = StaticText.new("noAltnFpln");
+		in.planEnd = StaticText.new(me, "fplnEnd");
+		in.planNoAlt = StaticText.new(me, "noAltnFpln");
 		if (debug == 1) printf("%d: Line computer created.", in.mcdu);
 		return in;
 	},
@@ -158,13 +176,13 @@ var FPLNLineComputer = {
 		} else {
 			fpln = fmgc.fp[fplnID]; # Get the Nasal Flightplan
 			me.destIndex = fmgc.arrivalAirportI[fplnID];
-			me.destination = FPLNText.new(fpln.getWP(me.destIndex), 1, fplnID, me.destIndex);
+			me.destination = FPLNText.new(me, fpln.getWP(me.destIndex), 1, fplnID, me.destIndex);
 			for (var j = 0; j < fpln.getPlanSize(); j += 1) {
 				me.dest = 0;
 				if (j == me.destIndex) {
 					me.dest = 1;
 				}
-				append(me.planList, FPLNText.new(fpln.getWP(j), me.dest, fplnID, j));
+				append(me.planList, FPLNText.new(me, fpln.getWP(j), me.dest, fplnID, j));
 			}
 			if (debug == 1) printf("%d: dest is: %s", me.mcdu, fpln.getWP(me.destIndex).wp_name);
 		}
@@ -274,10 +292,27 @@ var slewFPLN = func(d, i) { # Scrolling function. d is -1 or 1 for direction, an
 
 # Button and Inputs
 var FPLNButton = func(s, key, i) {
+	var scratchpad = getprop("/MCDU[" ~ i ~ "]/scratchpad");
 	if (s == "L") {
-		
+		if (key == 6 and TMPYActive[i].getBoolValue()) {
+			TMPYActive[i].setBoolValue(0);
+		} else {
+			if (size(FPLNLines[i].output) >= key) {
+				if (!TMPYActive[i].getBoolValue()) {
+					fmgc.flightplan.initTempFP(i, 2);
+				}
+				FPLNLines[i].output[key - 1].pushButtonLeft();
+			}
+		}
 	} else if (s == "R") {
-		
+		if (key == 6 and TMPYActive[i].getBoolValue()) {
+			fmgc.flightplan.executeTempFP(i, 2);
+		} else {
+			notAllowed(i); # Remove when has functionality
+#			if (size(FPLNLines[i].output) >= key) {
+#				FPLNLines[i].output[key - 1].pushButtonRight();
+#			}
+		}
 	}
 }
 

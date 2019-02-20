@@ -156,6 +156,8 @@ var flightplan = {
 		var wp = wpID[n][i].getValue();
 		if (fp[n].getPlanSize() > 2 and wp != FMGCdep.getValue() and wp != FMGCarr.getValue() and wp != "T/P" and wp != "PPOS") {
 			fp[n].deleteWP(i);
+			me.outputProps(); # Make sure everything is updated before we update the MCDUs.
+			me.updateMCDUDriver(n);
 			canvas_nd.A3XXRouteDriver.triggerSignal("fp-removed");
 			return 0;
 		} else {
@@ -174,14 +176,17 @@ var flightplan = {
 			append(wpDistancePrev[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/distance-from-prev", 0, "DOUBLE"));
 		}
 		me.outputProps(); # Make sure everything is updated before we update the MCDUs.
+		me.updateMCDUDriver(n);
+		canvas_nd.A3XXRouteDriver.triggerSignal("fp-added"); # Update the NDs
+	},
+	updateMCDUDriver: func(n) {
 		for (var i = 0; i < 2; i += 1) { # Update the 2 MCDUs
-			if (n == 0 or n == 1) {
-				mcdu.FPLNLines[i].replacePlan(n, mcdu.TMPY, mcdu.FPLNLines[i].index);
+			if (TMPYActive[i].getBoolValue()) {
+				mcdu.FPLNLines[i].replacePlan(i, mcdu.TMPY, mcdu.FPLNLines[i].index);
 			} else {
-				mcdu.FPLNLines[i].replacePlan(n, mcdu.MAIN, mcdu.FPLNLines[i].index);
+				mcdu.FPLNLines[i].replacePlan(2, mcdu.MAIN, mcdu.FPLNLines[i].index);
 			}
 		}
-		canvas_nd.A3XXRouteDriver.triggerSignal("fp-added"); # Update the NDs
 	},
 	outputProps: func() {
 		geoPos = geo.aircraft_position();

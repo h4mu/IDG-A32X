@@ -32,6 +32,8 @@ var StaticText = {
 			return "----END OF ALTN F-PLN---";
 		} else if (me.type == "noAltnFpln") {
 			return "------NO ALTN F-PLN-----";
+		} else if (me.type == "empty") {
+			return "";
 		}
 	},
 	getColor: func() {
@@ -42,7 +44,6 @@ var StaticText = {
 	},
 	type: nil,
 	pushButtonLeft: func() {
-		print(me.computer.mcdu ~ "statictext");
 		notAllowed(me.computer.mcdu);
 	},
 	pushButtonRight: func() {
@@ -95,7 +96,6 @@ var FPLNText = {
 	},
 	wp: nil,
 	pushButtonLeft: func() {
-		print(me.computer.mcdu ~ "fplntext");
 		if (me.computer.lines == MAIN) {
 			fmgc.flightplan.initTempFP(me.computer.mcdu, 2);
 		}
@@ -280,6 +280,9 @@ var FPLNLineComputer = {
 				}
 			}
 		}
+		while (size(me.output) < me.lines) {
+			append(me.output, StaticText.new(me, "empty"));
+		}
 		if (debug == 1) printf("%d: %d lines", me.mcdu, size(me.output));
 	},
 };
@@ -302,17 +305,26 @@ var FPLNButton = func(s, key, i) {
 		if (key == 6 and TMPYActive[i].getBoolValue()) {
 			TMPYActive[i].setBoolValue(0);
 		} else {
-			if (size(FPLNLines[i].output) >= key) {
-				FPLNLines[i].output[key - 1].pushButtonLeft();
+			if (scratchpad != "") {
+				if (size(FPLNLines[i].output) >= key) {
+					FPLNLines[i].output[key - 1].pushButtonLeft();
+				}
+			} else {
+				notAllowed(i); # Remove when has functionality
+				# FIXME: Add LAT REV Logic
 			}
 		}
 	} else if (s == "R") {
 		if (key == 6 and TMPYActive[i].getBoolValue()) {
 			fmgc.flightplan.executeTempFP(i, 2);
 		} else {
-			notAllowed(i); # Remove when has functionality
-#			if (size(FPLNLines[i].output) >= key) {
-#				FPLNLines[i].output[key - 1].pushButtonRight();
+#			if (scratchpad != "") {
+#				if (size(FPLNLines[i].output) >= key) {
+#					FPLNLines[i].output[key - 1].pushButtonRight();
+#				}
+#			} else {
+				notAllowed(i); # Remove when has functionality
+				# FIXME: Add VERT REV Logic
 #			}
 		}
 	}

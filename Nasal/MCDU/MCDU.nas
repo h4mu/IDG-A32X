@@ -559,7 +559,7 @@ var notAllowed = func(i) {
 
 var fomratError = func(i) {
 	if (getprop("/MCDU[" ~ i ~ "]/scratchpad") != "FORMAT ERROR") {
-		if (getprop("/MCDU[" ~ i ~ "]/scratchpad-msg") == 1) { # Messages clear after FORMAT ERROR
+		if (getprop("/MCDU[" ~ i ~ "]/scratchpad-msg") == 1) {
 			setprop("/MCDU[" ~ i ~ "]/last-scratchpad", "");
 		} else {
 			setprop("/MCDU[" ~ i ~ "]/last-scratchpad", getprop("/MCDU[" ~ i ~ "]/scratchpad"));

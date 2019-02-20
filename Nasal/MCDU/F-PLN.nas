@@ -25,7 +25,11 @@ var active_out = [nil, nil, props.globals.getNode("/FMGC/flightplan[2]/active")]
 var num_out = [props.globals.getNode("/FMGC/flightplan[0]/num"), props.globals.getNode("/FMGC/flightplan[1]/num"), props.globals.getNode("/FMGC/flightplan[2]/num")];
 var TMPYActive = [props.globals.getNode("/FMGC/internal/tmpy-active[0]"), props.globals.getNode("/FMGC/internal/tmpy-active[1]")];
 
-# Create text items
+var clearFPLNComputer = func {
+	FPLNLines[0].clear();
+	FPLNLines[1].clear();
+}
+
 var StaticText = {
 	new: func(type) {
 		var in = {parents:[StaticText]};
@@ -85,8 +89,20 @@ var FPLNText = {
 			}
 		}
 	},
-	getSubText: func() {
-		return "C" ~ sprintf("%03d", fmgc.wpCoursePrev[me.fp][me.index].getValue()) ~ "g"; # g is a degrees symbol in the MCDU font
+	getSubText: func(i) {
+		if (TMPYActive[i].getBoolValue()) {
+			if (fmgc.arrivalAirportI[i] == me.index) {
+				return "DEST";
+			} else {
+				return "C" ~ sprintf("%03d", fmgc.wpCoursePrev[me.fp][me.index].getValue()) ~ "g";
+			}
+		} else {
+			if (fmgc.arrivalAirportI[2] == me.index) {
+				return "DEST";
+			} else {
+				return "C" ~ sprintf("%03d", fmgc.wpCoursePrev[me.fp][me.index].getValue()) ~ "g";
+			}
+		}
 	},
 	wp: nil,
 	pushButtonLeft: func() {
@@ -117,21 +133,41 @@ var FPLNLineComputer = {
 	mcdu: nil,
 	fplnID: nil,
 	enableScroll: 0,
-	replacePlan: func(fplnID, lines, destIndex, firstLineIndex) {
+	clear: func() {
+		me.planList = [];
+		me.destIndex = -1;
+		me.destination = nil;
+		me.index = 0;
+		me.output = [];
+		me.enableScroll = 0;
+		if (me.lines == nil) {
+			me.lines = MAIN;
+		}
+		me.updateScroll();
+	},
+	replacePlan: func(fplnID, lines, firstLineIndex) {
 		# Here you set another plan, do this when changing plan on display or when destination changes
-		if (debug == 1) printf("%d: replacePlan called for %d lines and destIndex %d", me.mcdu, lines, destIndex);
-		fpln = fmgc.fp[fplnID]; # Get the Nasal Flightplan
+		if (debug == 1) printf("%d: replacePlan called for %d lines and me.destIndex %d", me.mcdu, lines, destIndex);
+		var fpln = nil;
+		if (!fmgc.active_out[2].getBoolValue()) {
+			fpln = createFlightplan();
+			me.destIndex = -1;
+			me.destination = nil;
+		} else {
+			fpln = fmgc.fp[fplnID]; # Get the Nasal Flightplan
+			me.destIndex = fmgc.arrivalAirportI[fplnID];
+			me.destination = FPLNText.new(fpln.getWP(me.destIndex), 1, fplnID, me.destIndex);
+		}
 		me.planList = [];
 		for (var j = 0; j < fpln.getPlanSize(); j += 1) {
 			me.dest = 0;
-			if (j == destIndex) {
+			if (j == me.destIndex) {
 				me.dest = 1;
 			}
 			append(me.planList, FPLNText.new(fpln.getWP(j), me.dest, fplnID, j));
-		}
-		me.destination = FPLNText.new(fpln.getWP(destIndex), 1, fplnID, destIndex);
-		if (debug == 1) printf("%d: dest is: %s", me.mcdu, fpln.getWP(destIndex).wp_name);
-		me.destIndex = destIndex;
+		}		
+		if (debug == 1) printf("%d: dest is: %s", me.mcdu, fpln.getWP(me.destIndex).wp_name);
+		
 		me.index = firstLineIndex;
 		me.lines = lines;
 		me.initScroll();
@@ -183,9 +219,9 @@ var FPLNLineComputer = {
 	},
 	updateScroll: func() {
 		me.output = [];
-		if (me.index <= size(me.planList)+1) {
+		if (me.index <= size(me.planList) + 1) {
 			var i = 0;
-			me.realIndex = me.index-1;
+			me.realIndex = me.index - 1;
 			if (debug == 1) printf("%d: updating display from index %d", me.mcdu, me.realIndex);
 			for (i = me.index; i < math.min(size(me.planList), me.index + 5); i += 1) {
 				append(me.output, me.planList[i]);
@@ -229,6 +265,7 @@ var FPLNLineComputer = {
 };
 
 var FPLNLines = [FPLNLineComputer.new(0), FPLNLineComputer.new(1)];
+clearFPLNComputer(); # Just in case, we have it in the clear state.
 
 # For testing purposes only -- do not touch!
 var test = func {

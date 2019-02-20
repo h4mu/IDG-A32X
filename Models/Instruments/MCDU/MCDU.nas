@@ -221,7 +221,7 @@ var canvas_MCDU_base = {
 				} else {
 					me["FPLN_L1"].hide();
 				}
-				fplnl1s = mcdu.FPLNLines[i].output[0].getSubText();
+				fplnl1s = mcdu.FPLNLines[i].output[0].getSubText(i);
 				if (fplnl1s != "") {
 					me["FPLN_L1S"].setText(fplnl1s);
 					me["FPLN_L1S"].show();
@@ -242,7 +242,7 @@ var canvas_MCDU_base = {
 				} else {
 					me["FPLN_L2"].hide();
 				}
-				fplnl2s = mcdu.FPLNLines[i].output[1].getSubText();
+				fplnl2s = mcdu.FPLNLines[i].output[1].getSubText(i);
 				if (fplnl2s != "") {
 					me["FPLN_L2S"].setText(fplnl2s);
 					me["FPLN_L2S"].show();
@@ -263,7 +263,7 @@ var canvas_MCDU_base = {
 				} else {
 					me["FPLN_L3"].hide();
 				}
-				fplnl3s = mcdu.FPLNLines[i].output[2].getSubText();
+				fplnl3s = mcdu.FPLNLines[i].output[2].getSubText(i);
 				if (fplnl3s != "") {
 					me["FPLN_L3S"].setText(fplnl3s);
 					me["FPLN_L3S"].show();
@@ -284,7 +284,7 @@ var canvas_MCDU_base = {
 				} else {
 					me["FPLN_L4"].hide();
 				}
-				fplnl4s = mcdu.FPLNLines[i].output[3].getSubText();
+				fplnl4s = mcdu.FPLNLines[i].output[3].getSubText(i);
 				if (fplnl4s != "") {
 					me["FPLN_L4S"].setText(fplnl4s);
 					me["FPLN_L4S"].show();
@@ -305,7 +305,7 @@ var canvas_MCDU_base = {
 				} else {
 					me["FPLN_L5"].hide();
 				}
-				fplnl5s = mcdu.FPLNLines[i].output[4].getSubText();
+				fplnl5s = mcdu.FPLNLines[i].output[4].getSubText(i);
 				if (fplnl5s != "") {
 					me["FPLN_L5S"].setText(fplnl5s);
 					me["FPLN_L5S"].show();
@@ -326,7 +326,7 @@ var canvas_MCDU_base = {
 				} else {
 					me["FPLN_L6"].hide();
 				}
-				fplnl6s = mcdu.FPLNLines[i].output[5].getSubText();
+				fplnl6s = mcdu.FPLNLines[i].output[5].getSubText(i);
 				if (fplnl6s != "") {
 					me["FPLN_L6S"].setText(fplnl6s);
 					me["FPLN_L6S"].show();

@@ -173,7 +173,7 @@ var flightplan = {
 			append(wpCoursePrev[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/course-from-prev", 0, "DOUBLE"));
 			append(wpDistancePrev[n], props.globals.initNode("/FMGC/flightplan[" ~ n ~ "]/wp[" ~ counter ~ "]/distance-from-prev", 0, "DOUBLE"));
 		}
-		canvas_nd.A3XXRouteDriver.triggerSignal("fp-added");
+		canvas_nd.A3XXRouteDriver.triggerSignal("fp-added"); # Update the NDs
 	},
 	outputProps: func() {
 		geoPos = geo.aircraft_position();

@@ -70,6 +70,7 @@ var initInputA = func(key, i) {
 		}
 	} else if (key == "R1") {
 		if (scratchpad == "CLR") {
+			clearFPLNComputer();
 			setprop("/FMGC/internal/dep-arpt", "");
 			setprop("/FMGC/internal/arr-arpt", "");
 			setprop("/FMGC/internal/tofrom-set", 0);

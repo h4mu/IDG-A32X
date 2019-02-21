@@ -557,7 +557,7 @@ var notAllowed = func(i) {
 	setprop("/MCDU[" ~ i ~ "]/scratchpad", "NOT ALLOWED");
 }
 
-var fomratError = func(i) {
+var formatError = func(i) {
 	if (getprop("/MCDU[" ~ i ~ "]/scratchpad") != "FORMAT ERROR") {
 		if (getprop("/MCDU[" ~ i ~ "]/scratchpad-msg") == 1) {
 			setprop("/MCDU[" ~ i ~ "]/last-scratchpad", "");

@@ -697,7 +697,11 @@ var ap_various = func {
 			setprop("/it-autoflight/internal/lnav-advance-nm", turn_dist);
 			
 			if (getprop("/FMGC/flightplan[2]/current-leg-dist") <= turn_dist) {
-				currentWP[2] = currentWP[2] + 1;
+				if (currentWP[2] < 1) {
+					currentWP[2] = 1;
+				} else if (num_out[2].getValue() > 2) { # The Airbus doesn't display anything past the previous waypoint after advancing
+					flightplan.advanceDelete(2);
+				}
 			}
 		}
 	}

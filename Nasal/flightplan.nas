@@ -100,6 +100,17 @@ var flightplan = {
 		}
 		me.checkWPOutputs(n);
 	},
+	advanceDelete: func(n) {
+		if (num_out[n].getValue() > 2) {
+			if (TMPYActive[0].getBoolValue() and wpID[0][0] == wpID[n][0]) {
+				me.deleteWP(0, 0);
+			}
+			if (TMPYActive[1].getBoolValue() and wpID[1][0] == wpID[n][0]) {
+				me.deleteWP(0, 1);
+			}
+			me.deleteWP(0, n, 1);
+		}
+	},
 	updateARPT: func(dep, arr, n) {
 		if (n == 2) { # Which flightplan?
 			me.reset2();
@@ -123,9 +134,12 @@ var flightplan = {
 		
 		me.checkWPOutputs(n);
 	},
+	# return 1 will cause NOT IN DATABASE, return 2 will cause NOT ALLOWED
 	insertFix: func(wp, i, n) {
 		var pos = findFixesByID(wp);
-		if (pos != nil and size(pos) > 0) {
+		if (i == 0) {
+			return 2;
+		} else if (pos != nil and size(pos) > 0) {
 			fp[n].insertWP(createWPFrom(pos[0]), i);
 			me.checkWPOutputs(n);
 			return 0;
@@ -135,7 +149,9 @@ var flightplan = {
 	},
 	insertArpt: func(wp, i, n) {
 		var pos = findAirportsByICAO(wp);
-		if (pos != nil and size(pos) > 0) {
+		if (i == 0) {
+			return 2;
+		} else if (pos != nil and size(pos) > 0) {
 			fp[n].insertWP(createWPFrom(pos[0]), i);
 			me.checkWPOutputs(n);
 			return 0;
@@ -145,7 +161,9 @@ var flightplan = {
 	},
 	insertNavaid: func(nav, i, n) {
 		var pos = findNavaidsByID(nav);
-		if (pos != nil and size(pos) > 0) {
+		if (i == 0) {
+			return 2;
+		} else if (pos != nil and size(pos) > 0) {
 			fp[n].insertWP(createWPFrom(pos[0]), i);
 			me.checkWPOutputs(n);
 			return 0;
@@ -161,16 +179,26 @@ var flightplan = {
 		fp[n].insertWP(createWP(geo.aircraft_position(), "T/P"), 0);
 		me.checkWPOutputs(n);
 	},
-	deleteWP: func(i, n) {
+	deleteWP: func(i, n, t) {
 		var wp = wpID[n][i].getValue();
-		if (fp[n].getPlanSize() > 2 and wp != FMGCdep.getValue() and wp != FMGCarr.getValue() and wp != "T/P" and wp != "PPOS") {
+		if (t == 1) {
 			fp[n].deleteWP(i);
 			me.outputProps(); # Make sure everything is updated before we update the MCDUs.
 			me.updateMCDUDriver(n);
 			canvas_nd.A3XXRouteDriver.triggerSignal("fp-removed");
 			return 0;
 		} else {
-			return 1;
+			if (i == 0) {
+				return 2;
+			} else if (fp[n].getPlanSize() > 2 and wp != FMGCdep.getValue() and wp != FMGCarr.getValue() and wp != "T/P" and wp != "PPOS") {
+				fp[n].deleteWP(i);
+				me.outputProps(); # Make sure everything is updated before we update the MCDUs.
+				me.updateMCDUDriver(n);
+				canvas_nd.A3XXRouteDriver.triggerSignal("fp-removed");
+				return 0;
+			} else {
+				return 2;
+			}
 		}
 	},
 	checkWPOutputs: func(n) {

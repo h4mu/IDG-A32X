@@ -7,6 +7,7 @@
 var TMPY = 5;
 var MAIN = 6;
 var debug = 0; # Set to 1 to check inner functionality
+var insertReturn = nil;
 var active_out = [nil, nil, props.globals.getNode("/FMGC/flightplan[2]/active")];
 var num_out = [props.globals.getNode("/FMGC/flightplan[0]/num"), props.globals.getNode("/FMGC/flightplan[1]/num"), props.globals.getNode("/FMGC/flightplan[2]/num")];
 var TMPYActive = [props.globals.getNode("/FMGC/internal/tmpy-active[0]"), props.globals.getNode("/FMGC/internal/tmpy-active[1]")];
@@ -80,7 +81,9 @@ var FPLNText = {
 		}
 	},
 	getSubText: func(i) {
-		if (TMPYActive[i].getBoolValue()) {
+		if (me.index == 0) {
+				return "";
+		} else if (TMPYActive[i].getBoolValue()) {
 			if (fmgc.arrivalAirportI[i] == me.index) {
 				return "DEST";
 			} else {
@@ -101,7 +104,7 @@ var FPLNText = {
 		}
 		var scratchpad = getprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad");
 		if (scratchpad == "CLR") {
-			if (fmgc.flightplan.deleteWP(me.index, me.computer.mcdu) != 0) {
+			if (fmgc.flightplan.deleteWP(me.index, me.computer.mcdu, 0) != 0) {
 				notAllowed(me.computer.mcdu);
 			} else {
 				setprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad-msg", 0);
@@ -109,19 +112,28 @@ var FPLNText = {
 			}
 		} else {
 			if (size(scratchpad) == 5) {
-				if (fmgc.flightplan.insertFix(scratchpad, me.index, me.computer.mcdu) != 0) {
+				var insertReturn = fmgc.flightplan.insertFix(scratchpad, me.index, me.computer.mcdu);
+				if (insertReturn == 2) {
+					notAllowed(me.computer.mcdu);
+				} else if (insertReturn == 1) {
 					notInDataBase(me.computer.mcdu);
 				} else {
 					setprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad", "");
 				}
 			} else if (size(scratchpad) == 4) {
-				if (fmgc.flightplan.insertArpt(scratchpad, me.index, me.computer.mcdu) != 0) {
+				var insertReturn = fmgc.flightplan.insertArpt(scratchpad, me.index, me.computer.mcdu);
+				if (insertReturn == 2) {
+					notAllowed(me.computer.mcdu);
+				} else if (insertReturn == 1) {
 					notInDataBase(me.computer.mcdu);
 				} else {
 					setprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad", "");
 				}
 			} else if (size(scratchpad) == 3) {
-				if (fmgc.flightplan.insertNavaid(scratchpad, me.index, me.computer.mcdu) != 0) {
+				var insertReturn = fmgc.flightplan.insertNavaid(scratchpad, me.index, me.computer.mcdu);
+				if (insertReturn == 2) {
+					notAllowed(me.computer.mcdu);
+				} else if (insertReturn == 1) {
 					notInDataBase(me.computer.mcdu);
 				} else {
 					setprop("/MCDU[" ~ me.computer.mcdu ~ "]/scratchpad", "");

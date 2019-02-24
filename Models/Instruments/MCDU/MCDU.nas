@@ -11,8 +11,7 @@ var symbol = "helvetica_medium.txf";
 var normal = 70;
 var small = 56;
 var page = "";
-var flightNum = props.globals.initNode("/MCDUC/flight-num", "", "STRING");
-var flightNumSet = props.globals.initNode("/MCDUC/flight-num-set", 0, "BOOL");
+var fplnLineSize = 0;
 var fplnl1 = "";
 var fplnl1s = "";
 var fplnl2 = "";
@@ -40,6 +39,12 @@ setprop("/MCDUC/colors/amb/b", 0.0000);
 setprop("/MCDUC/colors/yel/r", 0.9333);
 setprop("/MCDUC/colors/yel/g", 0.9333);
 setprop("/MCDUC/colors/yel/b", 0.0000);
+
+var WHITE = [1.0000,1.0000,1.0000];
+var GREEN = [0.0509,0.7529,0.2941];
+var BLUE = [0.0901,0.6039,0.7176];
+var AMBER = [0.7333,0.3803,0.0000];
+var YELLOW = [0.9333,0.9333,0.0000];
 
 # Fetch nodes:
 var ac1 = props.globals.getNode("/systems/electrical/bus/ac1", 1);
@@ -106,33 +111,15 @@ var engOutAcc = props.globals.getNode("/FMGC/internal/eng-out-reduc", 1);
 var engOutAccSet = props.globals.getNode("/MCDUC/reducacc-set", 1);
 var transAlt = props.globals.getNode("/FMGC/internal/trans-alt", 1);
 var managedSpeed = props.globals.getNode("/it-autoflight/input/spd-managed", 1);
+var TMPYActive = [props.globals.getNode("/FMGC/internal/tmpy-active[0]"), props.globals.getNode("/FMGC/internal/tmpy-active[1]")];
 
 # Fetch nodes into vectors
 var pageProp = [props.globals.getNode("/MCDU[0]/page", 1), props.globals.getNode("/MCDU[1]/page", 1)];
 var active = [props.globals.getNode("/MCDU[0]/active", 1), props.globals.getNode("/MCDU[1]/active", 1)];
 var scratchpad = [props.globals.getNode("/MCDU[0]/scratchpad", 1), props.globals.getNode("/MCDU[1]/scratchpad", 1)];
-var fplnL1 = [props.globals.getNode("/MCDU[0]/F-PLN/left-1", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-1", 1)];
-var fplnL2 = [props.globals.getNode("/MCDU[0]/F-PLN/left-2", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-2", 1)];
-var fplnL3 = [props.globals.getNode("/MCDU[0]/F-PLN/left-3", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-3", 1)];
-var fplnL4 = [props.globals.getNode("/MCDU[0]/F-PLN/left-4", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-4", 1)];
-var fplnL5 = [props.globals.getNode("/MCDU[0]/F-PLN/left-5", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-5", 1)];
-var fplnL6 = [props.globals.getNode("/MCDU[0]/F-PLN/left-6", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-6", 1)];
-var fplnL1s = [props.globals.getNode("/MCDU[0]/F-PLN/left-1s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-1s", 1)];
-var fplnL2s = [props.globals.getNode("/MCDU[0]/F-PLN/left-2s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-2s", 1)];
-var fplnL3s = [props.globals.getNode("/MCDU[0]/F-PLN/left-3s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-3s", 1)];
-var fplnL4s = [props.globals.getNode("/MCDU[0]/F-PLN/left-4s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-4s", 1)];
-var fplnL5s = [props.globals.getNode("/MCDU[0]/F-PLN/left-5s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-5s", 1)];
-var fplnL6s = [props.globals.getNode("/MCDU[0]/F-PLN/left-6s", 1), props.globals.getNode("/MCDU[1]/F-PLN/left-6s", 1)];
-var fpln1c = [props.globals.getNode("/MCDU[0]/F-PLN/line-1c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-1c", 1)];
-var fpln2c = [props.globals.getNode("/MCDU[0]/F-PLN/line-2c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-2c", 1)];
-var fpln3c = [props.globals.getNode("/MCDU[0]/F-PLN/line-3c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-3c", 1)];
-var fpln4c = [props.globals.getNode("/MCDU[0]/F-PLN/line-4c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-4c", 1)];
-var fpln5c = [props.globals.getNode("/MCDU[0]/F-PLN/line-5c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-5c", 1)];
-var fpln6c = [props.globals.getNode("/MCDU[0]/F-PLN/line-6c", 1), props.globals.getNode("/MCDU[1]/F-PLN/line-6c", 1)];
 
 # Create Nodes:
 var pageSwitch = [props.globals.initNode("/MCDU[0]/internal/switch", 0, "BOOL"), props.globals.initNode("/MCDU[1]/internal/switch", 0, "BOOL")];
-var fplnCSwitch = [props.globals.initNode("/MCDU[0]/internal/fpln-c-switch", 0, "BOOL"), props.globals.initNode("/MCDU[1]/internal/fpln-c-switch", 0, "BOOL")];
 
 var canvas_MCDU_base = {
 	init: func(canvas_group, file) {
@@ -183,7 +170,7 @@ var canvas_MCDU_base = {
 		"Simple_L1_Arrow","Simple_L2_Arrow","Simple_L3_Arrow","Simple_L4_Arrow","Simple_L5_Arrow","Simple_L6_Arrow","Simple_R1","Simple_R2","Simple_R3","Simple_R4","Simple_R5","Simple_R6","Simple_R1S","Simple_R2S","Simple_R3S","Simple_R4S","Simple_R5S",
 		"Simple_R6S","Simple_R1_Arrow","Simple_R2_Arrow","Simple_R3_Arrow","Simple_R4_Arrow","Simple_R5_Arrow","Simple_R6_Arrow","Simple_C1","Simple_C2","Simple_C3","Simple_C4","Simple_C5","Simple_C6","Simple_C1S","Simple_C2S","Simple_C3S","Simple_C4S",
 		"Simple_C5S","Simple_C6S","INITA","INITA_CoRoute","INITA_FltNbr","INITA_CostIndex","INITA_CruiseFLTemp","INITA_FromTo","INITA_InitRequest","INITA_AlignIRS","INITB","INITB_ZFWCG","INITB_ZFW","INITB_ZFW_S","INITB_Block","PERFTO","PERFTO_V1","PERFTO_VR",
-		"PERFTO_V2","PERFTO_FE","PERFTO_SE","PERFTO_OE","FPLN","FPLN_From","FPLN_Callsign","FPLN_L1","FPLN_L2","FPLN_L3","FPLN_L4","FPLN_L5","FPLN_L6","FPLN_L1S","FPLN_L2S","FPLN_L3S","FPLN_L4S","FPLN_L5S","FPLN_L6S"];
+		"PERFTO_V2","PERFTO_FE","PERFTO_SE","PERFTO_OE","FPLN","FPLN_From","FPLN_TMPY_group","FPLN_Callsign","FPLN_L1","FPLN_L2","FPLN_L3","FPLN_L4","FPLN_L5","FPLN_L6","FPLN_L1S","FPLN_L2S","FPLN_L3S","FPLN_L4S","FPLN_L5S","FPLN_L6S","FPLN_6_group"];
 	},
 	update: func() {
 		if (ac1.getValue() >= 110 and mcdu1_lgt.getValue() > 0.01) {
@@ -212,116 +199,157 @@ var canvas_MCDU_base = {
 				me["Simple_PageNum"].hide();
 				me["ArrowLeft"].show();
 				me["ArrowRight"].show();
-
+				
 				pageSwitch[i].setBoolValue(1);
 			}
-
+			
 			if (flightNumSet.getValue()) {
 				me["FPLN_Callsign"].setText(flightNum.getValue());
 				me["FPLN_Callsign"].show();
 			} else {
 				me["FPLN_Callsign"].hide();
 			}
-
-			fplnl1 = fplnL1[i].getValue();
-			if (fplnl1 != "") {
-				me["FPLN_L1"].setText(fplnl1);
-				me["FPLN_L1"].show();
+			
+			fplnLineSize = size(mcdu.FPLNLines[i].output);
+			
+			if (fplnLineSize >= 1) {
+				fplnl1 = mcdu.FPLNLines[i].output[0].getText();
+				if (fplnl1 != "") {
+					me["FPLN_L1"].setColor(mcdu.FPLNLines[i].output[0].getColor(i));
+					me["FPLN_L1"].setText(fplnl1);
+					me["FPLN_L1"].show();
+				} else {
+					me["FPLN_L1"].hide();
+				}
+				fplnl1s = mcdu.FPLNLines[i].output[0].getSubText(i);
+				if (fplnl1s != "") {
+					me["FPLN_L1S"].setText(fplnl1s);
+					me["FPLN_L1S"].show();
+				} else {
+					me["FPLN_L1S"].hide();
+				}
 			} else {
 				me["FPLN_L1"].hide();
-			}
-
-			fplnl2 = fplnL2[i].getValue();
-			if (fplnl2 != "") {
-				me["FPLN_L2"].setText(fplnl2);
-				me["FPLN_L2"].show();
-			} else {
-				me["FPLN_L2"].hide();
-			}
-
-			fplnl3 = fplnL3[i].getValue();
-			if (fplnl3 != "") {
-				me["FPLN_L3"].setText(fplnl3);
-				me["FPLN_L3"].show();
-			} else {
-				me["FPLN_L3"].hide();
-			}
-
-			fplnl4 = fplnL4[i].getValue();
-			if (fplnl4 != "") {
-				me["FPLN_L4"].setText(fplnl4);
-				me["FPLN_L4"].show();
-			} else {
-				me["FPLN_L4"].hide();
-			}
-
-			fplnl5 = fplnL5[i].getValue();
-			if (fplnl5 != "") {
-				me["FPLN_L5"].setText(fplnl5);
-				me["FPLN_L5"].show();
-			} else {
-				me["FPLN_L5"].hide();
-			}
-
-			fplnl6 = fplnL6[i].getValue();
-			if (fplnl6 != "") {
-				me["FPLN_L6"].setText(fplnl6);
-				me["FPLN_L6"].show();
-			} else {
-				me["FPLN_L6"].hide();
-			}
-
-			fplnl1s = fplnL1s[i].getValue();
-			if (fplnl1s != "") {
-				me["FPLN_L1S"].setText(fplnl1s);
-				me["FPLN_L1S"].show();
-			} else {
 				me["FPLN_L1S"].hide();
 			}
-
-			fplnl2s = fplnL2s[i].getValue();
-			if (fplnl2s != "") {
-				me["FPLN_L2S"].setText(fplnl2s);
-				me["FPLN_L2S"].show();
+			
+			if (fplnLineSize >= 2) {
+				fplnl2 = mcdu.FPLNLines[i].output[1].getText();
+				if (fplnl2 != "") {
+					me["FPLN_L2"].setColor(mcdu.FPLNLines[i].output[1].getColor(i));
+					me["FPLN_L2"].setText(fplnl2);
+					me["FPLN_L2"].show();
+				} else {
+					me["FPLN_L2"].hide();
+				}
+				fplnl2s = mcdu.FPLNLines[i].output[1].getSubText(i);
+				if (fplnl2s != "") {
+					me["FPLN_L2S"].setText(fplnl2s);
+					me["FPLN_L2S"].show();
+				} else {
+					me["FPLN_L2S"].hide();
+				}
 			} else {
+				me["FPLN_L2"].hide();
 				me["FPLN_L2S"].hide();
 			}
-
-			fplnl3s = fplnL3s[i].getValue();
-			if (fplnl3s != "") {
-				me["FPLN_L3S"].setText(fplnl3s);
-				me["FPLN_L3S"].show();
+			
+			if (fplnLineSize >= 3) {
+				fplnl3 = mcdu.FPLNLines[i].output[2].getText();
+				if (fplnl3 != "") {
+					me["FPLN_L3"].setColor(mcdu.FPLNLines[i].output[2].getColor(i));
+					me["FPLN_L3"].setText(fplnl3);
+					me["FPLN_L3"].show();
+				} else {
+					me["FPLN_L3"].hide();
+				}
+				fplnl3s = mcdu.FPLNLines[i].output[2].getSubText(i);
+				if (fplnl3s != "") {
+					me["FPLN_L3S"].setText(fplnl3s);
+					me["FPLN_L3S"].show();
+				} else {
+					me["FPLN_L3S"].hide();
+				}
 			} else {
+				me["FPLN_L3"].hide();
 				me["FPLN_L3S"].hide();
 			}
-
-			fplnl4s = fplnL4s[i].getValue();
-			if (fplnl4s != "") {
-				me["FPLN_L4S"].setText(fplnl4s);
-				me["FPLN_L4S"].show();
+			
+			if (fplnLineSize >= 4) {
+				fplnl4 = mcdu.FPLNLines[i].output[3].getText();
+				if (fplnl4 != "") {
+					me["FPLN_L4"].setColor(mcdu.FPLNLines[i].output[3].getColor(i));
+					me["FPLN_L4"].setText(fplnl4);
+					me["FPLN_L4"].show();
+				} else {
+					me["FPLN_L4"].hide();
+				}
+				fplnl4s = mcdu.FPLNLines[i].output[3].getSubText(i);
+				if (fplnl4s != "") {
+					me["FPLN_L4S"].setText(fplnl4s);
+					me["FPLN_L4S"].show();
+				} else {
+					me["FPLN_L4S"].hide();
+				}
 			} else {
+				me["FPLN_L4"].hide();
 				me["FPLN_L4S"].hide();
 			}
-
-			fplnl5s = fplnL5s[i].getValue();
-			if (fplnl5s != "") {
-				me["FPLN_L5S"].setText(fplnl5s);
-				me["FPLN_L5S"].show();
+			
+			if (fplnLineSize >= 5) {
+				fplnl5 = mcdu.FPLNLines[i].output[4].getText();
+				if (fplnl5 != "") {
+					me["FPLN_L5"].setColor(mcdu.FPLNLines[i].output[4].getColor(i));
+					me["FPLN_L5"].setText(fplnl5);
+					me["FPLN_L5"].show();
+				} else {
+					me["FPLN_L5"].hide();
+				}
+				fplnl5s = mcdu.FPLNLines[i].output[4].getSubText(i);
+				if (fplnl5s != "") {
+					me["FPLN_L5S"].setText(fplnl5s);
+					me["FPLN_L5S"].show();
+				} else {
+					me["FPLN_L5S"].hide();
+				}
 			} else {
+				me["FPLN_L5"].hide();
 				me["FPLN_L5S"].hide();
 			}
-
-			fplnl6s = fplnL6s[i].getValue();
-			if (fplnl6s != "") {
-				me["FPLN_L6S"].setText(fplnl6s);
-				me["FPLN_L6S"].show();
+			
+			if (fplnLineSize >= 6) {
+				fplnl6 = mcdu.FPLNLines[i].output[5].getText();
+				if (fplnl6 != "") {
+					me["FPLN_L6"].setColor(mcdu.FPLNLines[i].output[5].getColor(i));
+					me["FPLN_L6"].setText(fplnl6);
+					me["FPLN_L6"].show();
+				} else {
+					me["FPLN_L6"].hide();
+				}
+				fplnl6s = mcdu.FPLNLines[i].output[5].getSubText(i);
+				if (fplnl6s != "") {
+					me["FPLN_L6S"].setText(fplnl6s);
+					me["FPLN_L6S"].show();
+				} else {
+					me["FPLN_L6S"].hide();
+				}
 			} else {
+				me["FPLN_L6"].hide();
 				me["FPLN_L6S"].hide();
 			}
-
-			if (fplnCSwitch[i].getBoolValue() != 1) {
-				me.FPLNcolor(fpln1c[i].getValue(), fpln2c[i].getValue(), fpln3c[i].getValue(), fpln4c[i].getValue(), fpln5c[i].getValue(), fpln6c[i].getValue());
-				fplnCSwitch[i].setBoolValue(1);
+			
+			if (mcdu.FPLNLines[i].index == 0) {
+				me["FPLN_From"].show();
+			} else {
+				me["FPLN_From"].hide();
+			}
+			
+			if (TMPYActive[i].getBoolValue()) {
+				me["FPLN_TMPY_group"].show();
+				me["FPLN_6_group"].hide();
+			} else {
+				me["FPLN_TMPY_group"].hide();
+				me["FPLN_6_group"].show();
 			}
 		} else if (page == "MCDU") {
 			if (!pageSwitch[i].getBoolValue()) {
@@ -1741,20 +1769,6 @@ var canvas_MCDU_base = {
 			me["Simple_C6S"].setColor(getprop("/MCDUC/colors/" ~ f ~ "/r"), getprop("/MCDUC/colors/" ~ f ~ "/g"), getprop("/MCDUC/colors/" ~ f ~ "/b"));
 		}
 	},
-	FPLNcolor: func(a, b, c, d, e, f) {
-		me["FPLN_L1"].setColor(getprop("/MCDUC/colors/" ~ a ~ "/r"), getprop("/MCDUC/colors/" ~ a ~ "/g"), getprop("/MCDUC/colors/" ~ a ~ "/b"));
-		me["FPLN_L1S"].setColor(getprop("/MCDUC/colors/" ~ a ~ "/r"), getprop("/MCDUC/colors/" ~ a ~ "/g"), getprop("/MCDUC/colors/" ~ a ~ "/b"));
-		me["FPLN_L2"].setColor(getprop("/MCDUC/colors/" ~ b ~ "/r"), getprop("/MCDUC/colors/" ~ b ~ "/g"), getprop("/MCDUC/colors/" ~ b ~ "/b"));
-		me["FPLN_L2S"].setColor(getprop("/MCDUC/colors/" ~ b ~ "/r"), getprop("/MCDUC/colors/" ~ b ~ "/g"), getprop("/MCDUC/colors/" ~ b ~ "/b"));
-		me["FPLN_L3"].setColor(getprop("/MCDUC/colors/" ~ c ~ "/r"), getprop("/MCDUC/colors/" ~ c ~ "/g"), getprop("/MCDUC/colors/" ~ c ~ "/b"));
-		me["FPLN_L3S"].setColor(getprop("/MCDUC/colors/" ~ c ~ "/r"), getprop("/MCDUC/colors/" ~ c ~ "/g"), getprop("/MCDUC/colors/" ~ c ~ "/b"));
-		me["FPLN_L4"].setColor(getprop("/MCDUC/colors/" ~ d ~ "/r"), getprop("/MCDUC/colors/" ~ d ~ "/g"), getprop("/MCDUC/colors/" ~ d ~ "/b"));
-		me["FPLN_L4S"].setColor(getprop("/MCDUC/colors/" ~ d ~ "/r"), getprop("/MCDUC/colors/" ~ d ~ "/g"), getprop("/MCDUC/colors/" ~ d ~ "/b"));
-		me["FPLN_L5"].setColor(getprop("/MCDUC/colors/" ~ e ~ "/r"), getprop("/MCDUC/colors/" ~ e ~ "/g"), getprop("/MCDUC/colors/" ~ e ~ "/b"));
-		me["FPLN_L5S"].setColor(getprop("/MCDUC/colors/" ~ e ~ "/r"), getprop("/MCDUC/colors/" ~ e ~ "/g"), getprop("/MCDUC/colors/" ~ e ~ "/b"));
-		me["FPLN_L6"].setColor(getprop("/MCDUC/colors/" ~ f ~ "/r"), getprop("/MCDUC/colors/" ~ f ~ "/g"), getprop("/MCDUC/colors/" ~ f ~ "/b"));
-		me["FPLN_L6S"].setColor(getprop("/MCDUC/colors/" ~ f ~ "/r"), getprop("/MCDUC/colors/" ~ f ~ "/g"), getprop("/MCDUC/colors/" ~ f ~ "/b"));
-	},
 	# 0 = ignore
 	fontLeft: func (a, b, c, d, e, f) {
 		if (a != 0) {
@@ -1960,82 +1974,8 @@ var showMCDU2 = func {
 
 setlistener("/MCDU[0]/page", func {
 	pageSwitch[0].setBoolValue(0);
-	fplnCSwitch[0].setBoolValue(0);
 }, 0, 0);
 
 setlistener("/MCDU[1]/page", func {
 	pageSwitch[1].setBoolValue(0);
-	fplnCSwitch[1].setBoolValue(0);
-}, 0, 0);
-
-setlistener("/MCDU[0]/F-PLN/line-1c", func {
-	if (pageProp[0].getValue() == "F-PLNA" or pageProp[0].getValue() == "F-PLNB") {
-		fplnCSwitch[0].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[0]/F-PLN/line-2c", func {
-	if (pageProp[0].getValue() == "F-PLNA" or pageProp[0].getValue() == "F-PLNB") {
-		fplnCSwitch[0].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[0]/F-PLN/line-3c", func {
-	if (pageProp[0].getValue() == "F-PLNA" or pageProp[0].getValue() == "F-PLNB") {
-		fplnCSwitch[0].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[0]/F-PLN/line-4c", func {
-	if (pageProp[0].getValue() == "F-PLNA" or pageProp[0].getValue() == "F-PLNB") {
-		fplnCSwitch[0].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[0]/F-PLN/line-5c", func {
-	if (pageProp[0].getValue() == "F-PLNA" or pageProp[0].getValue() == "F-PLNB") {
-		fplnCSwitch[0].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[0]/F-PLN/line-6c", func {
-	if (pageProp[0].getValue() == "F-PLNA" or pageProp[0].getValue() == "F-PLNB") {
-		fplnCSwitch[0].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[1]/F-PLN/line-1c", func {
-	if (pageProp[1].getValue() == "F-PLNA" or pageProp[1].getValue() == "F-PLNB") {
-		fplnCSwitch[1].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[1]/F-PLN/line-2c", func {
-	if (pageProp[1].getValue() == "F-PLNA" or pageProp[1].getValue() == "F-PLNB") {
-		fplnCSwitch[1].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[1]/F-PLN/line-3c", func {
-	if (pageProp[1].getValue() == "F-PLNA" or pageProp[1].getValue() == "F-PLNB") {
-		fplnCSwitch[1].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[1]/F-PLN/line-4c", func {
-	if (pageProp[1].getValue() == "F-PLNA" or pageProp[1].getValue() == "F-PLNB") {
-		fplnCSwitch[1].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[1]/F-PLN/line-5c", func {
-	if (pageProp[1].getValue() == "F-PLNA" or pageProp[1].getValue() == "F-PLNB") {
-		fplnCSwitch[1].setBoolValue(0);
-	}
-}, 0, 0);
-
-setlistener("/MCDU[1]/F-PLN/line-6c", func {
-	if (pageProp[1].getValue() == "F-PLNA" or pageProp[1].getValue() == "F-PLNB") {
-		fplnCSwitch[1].setBoolValue(0);
-	}
 }, 0, 0);

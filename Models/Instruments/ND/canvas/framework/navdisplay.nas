@@ -233,7 +233,7 @@ canvas.NavDisplay.newMFD = func(canvas_group, parent=nil, nd_options=nil, update
 	#print("navdisplay.mfd:ND layer setup completed");
 
 	# TODO: move this to RTE.lcontroller ?
-	me.listen("/FMGC/flightplan[1]/current-wp", func(activeWp) {
+	me.listen("/FMGC/flightplan[2]/current-wp", func(activeWp) {
 		canvas.updatewp( activeWp.getValue() );
 	});
 
@@ -304,12 +304,12 @@ canvas.NavDisplay.update_sub = func(){
 				pos.lat = wp.wp_lat;
 				pos.lon = wp.wp_lon;
 			} else {
-				pos.lat = getprop("/FMGC/flightplan[1]/wp[" ~ pln_wpt_idx ~ "]/lat");
-				pos.lon = getprop("/FMGC/flightplan[1]/wp[" ~ pln_wpt_idx ~ "]/lon");
+				pos.lat = getprop("/FMGC/flightplan[2]/wp[" ~ pln_wpt_idx ~ "]/lat");
+				pos.lon = getprop("/FMGC/flightplan[2]/wp[" ~ pln_wpt_idx ~ "]/lon");
 			}
 		} else {
-			pos.lat = getprop("/FMGC/flightplan[1]/wp[" ~ pln_wpt_idx ~ "]/lat");
-			pos.lon = getprop("/FMGC/flightplan[1]/wp[" ~ pln_wpt_idx ~ "]/lon");
+			pos.lat = getprop("/FMGC/flightplan[2]/wp[" ~ pln_wpt_idx ~ "]/lat");
+			pos.lon = getprop("/FMGC/flightplan[2]/wp[" ~ pln_wpt_idx ~ "]/lon");
 		}
 	} else {
 		pos.lat = userLat;

@@ -282,7 +282,7 @@ var reset_FMGC = func {
 	spd = getprop("/it-autoflight/input/spd-kts");
 	hdg = getprop("/it-autoflight/input/hdg");
 	alt = getprop("/it-autoflight/input/alt");
-	APinit();
+	ITAF.init();
 	FMGCinit();
 	flightplan.reset();
 	mcdu.MCDU_reset(0);
@@ -336,9 +336,6 @@ var various2 = maketimer(0.5, func {
 	nav3();
 	adf0();
 	adf1();
-	if (getprop("/it-autoflight/output/lat") == 0) {
-		setprop("/it-autoflight/custom/show-hdg", 1);
-	}
 });
 
 var nav0 = func {

@@ -5,8 +5,9 @@
 print("System: You are using an experimental version of the IDG-A32X. Things may go TERRIBLY WRONG!");
 print("System: FMGC Dev Version - Copyright (c) 2019 Joshua Davidson (it0uchpods)");
 
-# 0 = TEMP FP
-# 1 = ACTIVE FP
+# 0 = TEMP FP Captain MCDU
+# 1 = TEMP FP First Officer MCDU
+# 2 = ACTIVE FP
 var fp = [createFlightplan(), createFlightplan(), createFlightplan()];
 var wpDep = nil;
 var wpArr = nil;

@@ -1,9 +1,7 @@
 # A3XX Pneumatic System
 # Joshua Davidson (it0uchpods) and Jonathan Redpath (legoboyvdlp)
 
-##############################################
-# Copyright (c) Joshua Davidson (it0uchpods) #
-##############################################
+# Copyright (c) 2019 Joshua Davidson (it0uchpods)
 
 var altitude = 0;
 var bleed1_sw = 0;
@@ -198,9 +196,17 @@ var PNEU = {
 		# Air Sources/PSI
 		if (rpmapu >= 94.9 and bleedapu_sw and !bleedapu_fail) {
 			setprop("/systems/pneumatic/bleedapu", 34);
-			setprop("/systems/apu/bleed-used", 1);
+			if (getprop("/controls/APU/master") == 1) {
+				setprop("/systems/apu/bleed-used", 1);
+			}
 		} else {
 			setprop("/systems/pneumatic/bleedapu", 0);
+		}
+		
+		if (groundair_supp and !bleedext_fail) {
+			setprop("/systems/pneumatic/groundair", 39);
+		} else {
+			setprop("/systems/pneumatic/groundair", 0);
 		}
 		
 		ground = getprop("/systems/pneumatic/groundair");
@@ -295,12 +301,6 @@ var PNEU = {
 			setprop("/systems/pneumatic/total-psi", total_psi_calc);
 		}
 		
-		if (groundair_supp) {
-			setprop("/systems/pneumatic/groundair", 39);
-		} else {
-			setprop("/systems/pneumatic/groundair", 0);
-		}
-		
 		if (engantiice1 and bleed1 > 20) { # shut down anti-ice if bleed is lost else turn it on
 			setprop("/controls/deice/lengine", 0); 
 			setprop("/controls/deice/eng1-on", 0);
@@ -320,7 +320,6 @@ var PNEU = {
 		}
 		
 		total_psi = getprop("/systems/pneumatic/total-psi");
-		
 		phase = getprop("/FMGC/status/phase");
 		pressmode = getprop("/systems/pressurization/mode");
 		state1 = getprop("/systems/thrust/state1");

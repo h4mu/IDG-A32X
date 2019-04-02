@@ -1,15 +1,11 @@
 <?xml version="1.0"?>
 
-<!--
-##############################################
-# Copyright (c) Joshua Davidson (it0uchpods) #
-##############################################
--->
+<!-- Copyright (c) 2019 Joshua Davidson (it0uchpods) -->
 
 <turbine_engine name="CFM56_5B4">
 	<!-- source https://www.youtube.com/watch?v=jnGfzv7Odh4 -->
 	<milthrust>     27000 </milthrust>
-	<tsfc>            0.5 </tsfc>
+	<tsfc>          0.445 </tsfc>
 	<bleed>          0.03 </bleed>
 	<ignitionn1>	  0.6 </ignitionn1>
 	<ignitionn2>	 22.2</ignitionn2>

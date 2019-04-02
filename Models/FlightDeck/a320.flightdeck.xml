@@ -1,10 +1,6 @@
 <?xml version="1.0"?>
 
-<!--
-##############################################
-# Copyright (c) Joshua Davidson (it0uchpods) #
-##############################################
--->
+<!-- Copyright (c) 2019 Joshua Davidson (it0uchpods) -->
 
 <PropertyList>
 
@@ -452,42 +448,19 @@
 	<animation>
 		<type>select</type>
 		<object-name>alt-text-test</object-name>
-		<object-name>audio_att_led</object-name>
 		<object-name>audio_att_sgn</object-name>
 		<object-name>audio_call_hf2_led</object-name>
 		<object-name>audio_call_hf1_led</object-name>
 		<object-name>audio_call_vhf1_led</object-name>
 		<object-name>audio_call_vhf2_led</object-name>
 		<object-name>audio_call_vhf3_led</object-name>
-		<object-name>audio_hf1_led</object-name>
-		<object-name>audio_hf2_led</object-name>
-		<object-name>audio_mech_led</object-name>
 		<object-name>audio_mech_sgn</object-name>
-		<object-name>audio_voice_led</object-name>
-		<object-name>audio_vhf1_led</object-name>
-		<object-name>audio_vhf2_led</object-name>
-		<object-name>audio_vhf3_led</object-name>
 		<object-name>autoland_light_on</object-name>
-		<object-name>ecam_apu_led</object-name>
-		<object-name>ecam_bleed_led</object-name>
-		<object-name>ecam_cond_led</object-name>
-		<object-name>ecam_clr_l_led</object-name>
-		<object-name>ecam_clr_r_led</object-name>
 		<object-name>ecam_c_b_led</object-name>
-		<object-name>ecam_door_led</object-name>
-		<object-name>ecam_elec_led</object-name>
 		<object-name>ecam_el_dc_led</object-name>
-		<object-name>ecam_eng_led</object-name>
-		<object-name>ecam_fctl_led</object-name>
-		<object-name>ecam_fuel_led</object-name>
-		<object-name>ecam_hyd_led</object-name>
-		<object-name>ecam_press_led</object-name>
 		<object-name>ecam_sts_led</object-name>
-		<object-name>ecam_wheel_led</object-name>
 		<object-name>exped_led</object-name>
 		<object-name>hdg-text-test</object-name>
-		<object-name>master_caution_on</object-name>
-		<object-name>master_warning_on</object-name>
 		<object-name>qnh-test</object-name>
 		<object-name>radio_opt_led</object-name>
 		<object-name>rudder-trim-test</object-name>
@@ -657,7 +630,7 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>ParkBrk</object-name>
-		<property>controls/gear/brake-parking</property>
+		<property>fdm/jsbsim/fcs/brake-lever</property>
 		<factor>90</factor>
 		<axis>
 			<object-name>ParkBrk.axis</object-name>
@@ -879,6 +852,45 @@
 		</action>
 	</animation>
 	
+	<animation>
+		<type>rotate</type>
+		<object-name>land_sw</object-name>
+		<property>controls/gear/nws-switch</property>
+		<interpolation>
+			<entry><ind>0</ind><dep>35</dep></entry>
+			<entry><ind>1</ind><dep> 0</dep></entry>
+		</interpolation>
+		<axis>
+			<x>0</x>
+			<y>1</y>
+			<z>0</z>
+		</axis>
+		<center>
+			<x-m>-0.562289</x-m>
+			<y-m>0.259382</y-m>
+			<z-m>0.253933</z-m>
+		</center>
+	</animation>
+	
+	<animation>
+		<type>pick</type>
+		<object-name>land_sw</object-name>
+		<action>
+			<button>0</button>
+			<button>3</button>
+			<repeatable>false</repeatable>
+			<binding>
+				<command>property-cycle</command>
+				<property>controls/gear/nws-switch</property>
+				<value>0</value>
+				<value>1</value>
+			</binding>
+			<binding>
+				<command>nasal</command>
+				<script>setprop("/sim/sounde/switch1", 1);</script>
+			</binding>
+		</action>
+	</animation>
 	<!-- Dimmer Panel Left -->
 	<animation>
 		<type>pick</type>
@@ -1171,9 +1183,8 @@
 						<value>25</value>
 					</greater-than-equals>
 				</condition>
-				<command>property-assign</command>
-				<property>ECAM/Lower/page</property>
-				<value>sts</value>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("sts");</script>
 			</binding>
 		</action>
 	</animation>
@@ -1191,9 +1202,8 @@
 						<value>25</value>
 					</greater-than-equals>
 				</condition>
-				<command>property-assign</command>
-				<property>ECAM/Lower/page</property>
-				<value>apu</value>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("apu");</script>
 			</binding>
 		</action>
 	</animation>
@@ -1211,9 +1221,8 @@
 						<value>25</value>
 					</greater-than-equals>
 				</condition>
-				<command>property-assign</command>
-				<property>ECAM/Lower/page</property>
-				<value>bleed</value>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("bleed");</script>
 			</binding>
 		</action>
 	</animation>
@@ -1231,9 +1240,8 @@
 						<value>25</value>
 					</greater-than-equals>
 				</condition>
-				<command>property-assign</command>
-				<property>ECAM/Lower/page</property>
-				<value>press</value>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("press");</script>
 			</binding>
 		</action>
 	</animation>
@@ -1251,9 +1259,8 @@
 						<value>25</value>
 					</greater-than-equals>
 				</condition>
-				<command>property-assign</command>
-				<property>ECAM/Lower/page</property>
-				<value>elec</value>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("elec");</script>
 			</binding>
 		</action>
 	</animation>
@@ -1271,9 +1278,8 @@
 						<value>25</value>
 					</greater-than-equals>
 				</condition>
-				<command>property-assign</command>
-				<property>ECAM/Lower/page</property>
-				<value>hyd</value>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("hyd");</script>
 			</binding>
 		</action>
 	</animation>
@@ -1291,9 +1297,8 @@
 						<value>25</value>
 					</greater-than-equals>
 				</condition>
-				<command>property-assign</command>
-				<property>ECAM/Lower/page</property>
-				<value>fuel</value>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("fuel");</script>
 			</binding>
 		</action>
 	</animation>
@@ -1311,9 +1316,8 @@
 						<value>25</value>
 					</greater-than-equals>
 				</condition>
-				<command>property-assign</command>
-				<property>ECAM/Lower/page</property>
-				<value>eng</value>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("eng");</script>
 			</binding>
 		</action>
 	</animation>
@@ -1331,9 +1335,8 @@
 						<value>25</value>
 					</greater-than-equals>
 				</condition>
-				<command>property-assign</command>
-				<property>ECAM/Lower/page</property>
-				<value>cond</value>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("cond");</script>
 			</binding>
 		</action>
 	</animation>
@@ -1351,9 +1354,8 @@
 						<value>25</value>
 					</greater-than-equals>
 				</condition>
-				<command>property-assign</command>
-				<property>ECAM/Lower/page</property>
-				<value>door</value>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("door");</script>
 			</binding>
 		</action>
 	</animation>
@@ -1371,9 +1373,8 @@
 						<value>25</value>
 					</greater-than-equals>
 				</condition>
-				<command>property-assign</command>
-				<property>ECAM/Lower/page</property>
-				<value>wheel</value>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("wheel");</script>
 			</binding>
 		</action>
 	</animation>
@@ -1391,9 +1392,8 @@
 						<value>25</value>
 					</greater-than-equals>
 				</condition>
-				<command>property-assign</command>
-				<property>ECAM/Lower/page</property>
-				<value>fctl</value>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("fctl");</script>
 			</binding>
 		</action>
 	</animation>
@@ -1416,6 +1416,251 @@
 			</binding>
 		</action>
 	</animation>
+
+	<!-- ECAM page keys -->
+	<animation>
+		<type>select</type>
+		<object-name>ecam_eng_led</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>ECAM/Lower/light/eng</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+
+	<animation>
+		<type>select</type>
+		<object-name>ecam_apu_led</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>ECAM/Lower/light/apu</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+
+	<animation>
+		<type>select</type>
+		<object-name>ecam_door_led</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>ECAM/Lower/light/door</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+
+	<animation>
+		<type>select</type>
+		<object-name>ecam_elec_led</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>ECAM/Lower/light/elec</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+
+	<animation>
+		<type>select</type>
+		<object-name>ecam_fuel_led</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>ECAM/Lower/light/fuel</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+
+	<animation>
+		<type>select</type>
+		<object-name>ecam_hyd_led</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>ECAM/Lower/light/hyd</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+
+	<animation>
+		<type>select</type>
+		<object-name>ecam_fctl_led</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>ECAM/Lower/light/fctl</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+
+	<animation>
+		<type>select</type>
+		<object-name>ecam_press_led</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>ECAM/Lower/light/press</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+
+	<animation>
+		<type>select</type>
+		<object-name>ecam_wheel_led</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>ECAM/Lower/light/wheel</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+
+	<animation>
+		<type>select</type>
+		<object-name>ecam_bleed_led</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>ECAM/Lower/light/bleed</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+
+	<animation>
+		<type>select</type>
+		<object-name>ecam_cond_led</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>ECAM/Lower/light/cond</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+	
+	<animation>
+		<type>select</type>
+		<object-name>ecam_clr_l_led</object-name>
+		<object-name>ecam_clr_r_led</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>ECAM/Lower/light/clr</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+
+	<animation>
+		<type>pick</type>
+		<object-name>ecam_rcl</object-name>
+		<action>
+			<button>0</button>
+			<repeatable type="bool">false</repeatable>
+			<binding>
+				<condition>
+					<greater-than-equals>
+						<property>systems/electrical/bus/dc-ess</property>
+						<value>25</value>
+					</greater-than-equals>
+				</condition>
+				<command>nasal</command>
+				<script>ecam.ECAM_controller.recall();</script>
+			</binding>
+		</action>
+	</animation>
+	
+	<animation>
+		<type>pick</type>
+		<object-name>ecam_clr_l</object-name>
+		<object-name>ecam_clr_r</object-name>
+		<action>
+			<button>0</button>
+			<repeatable type="bool">false</repeatable>
+			<binding>
+				<condition>
+					<greater-than-equals>
+						<property>systems/electrical/bus/dc-ess</property>
+						<value>25</value>
+					</greater-than-equals>
+				</condition>
+				<command>nasal</command>
+				<script>libraries.LowerECAM.button("clr");</script>
+			</binding>
+		</action>
+	</animation>
 	
 	<!-- Engine Cutoff/Mode Selector -->
 	<animation>
@@ -1434,7 +1679,7 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>Lcutoff</object-name>
-		<property>controls/engines/engine[0]/cutoff-switch</property>
+		<property>fdm/jsbsim/fcs/engine-cutoff[0]</property>
 		<interpolation>
 			<entry><ind>0</ind><dep>  0</dep></entry>
 			<entry><ind>1</ind><dep>-70</dep></entry>
@@ -1460,7 +1705,7 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>Rcutoff</object-name>
-		<property>controls/engines/engine[1]/cutoff-switch</property>
+		<property>fdm/jsbsim/fcs/engine-cutoff[1]</property>
 		<interpolation>
 			<entry><ind>0</ind><dep>  0</dep></entry>
 			<entry><ind>1</ind><dep>-70</dep></entry>
@@ -1990,14 +2235,11 @@
 			<button>0</button>
 			<repeatable type="bool">false</repeatable>
 			<binding>
-				<condition>
-					<greater-than-equals>
-						<property>systems/electrical/bus/dc-ess</property>
-						<value>25</value>
-					</greater-than-equals>
-				</condition>
-				<command>property-toggle</command>
-				<property>it-autoflight/input/fd1</property>
+				<command>nasal</command>
+				<script>
+					libraries.APPanel.FD1();
+					setprop("/sim/sounde/btn1", 1);
+				</script>
 			</binding>
 		</action>
 	</animation>
@@ -2095,14 +2337,11 @@
 			<button>0</button>
 			<repeatable type="bool">false</repeatable>
 			<binding>
-				<condition>
-					<greater-than-equals>
-						<property>systems/electrical/bus/dc-ess</property>
-						<value>25</value>
-					</greater-than-equals>
-				</condition>
-				<command>property-toggle</command>
-				<property>it-autoflight/input/fd2</property>
+				<command>nasal</command>
+				<script>
+					libraries.APPanel.FD2();
+					setprop("/sim/sounde/btn1", 1);
+				</script>
 			</binding>
 		</action>
 	</animation>
@@ -2553,7 +2792,7 @@
 			<repeatable type="bool">false</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>libraries.mode_inc();</script>
+				<script>libraries.setCptND(1);</script>
 			</binding>
 		</action>
 		<action>
@@ -2562,7 +2801,7 @@
 			<repeatable type="bool">false</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>libraries.mode_dec();</script>
+				<script>libraries.setCptND(-1);</script>
 			</binding>
 		</action>
 	</animation>
@@ -2591,7 +2830,7 @@
 			<repeatable type="bool">false</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>libraries.mode2_inc();</script>
+				<script>libraries.setFoND(1);</script>
 			</binding>
 		</action>
 		<action>
@@ -2600,7 +2839,7 @@
 			<repeatable type="bool">false</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>libraries.mode2_dec();</script>
+				<script>libraries.setFoND(-1);</script>
 			</binding>
 		</action>
 	</animation>
@@ -2629,7 +2868,7 @@
 			<repeatable type="bool">false</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>libraries.ctl_func("range",1);</script>
+				<script>libraries.setNDRange(0, 1);</script>
 			</binding>
 		</action>
 		<action>
@@ -2638,7 +2877,7 @@
 			<repeatable type="bool">false</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>libraries.ctl_func("range",-1);</script>
+				<script>libraries.setNDRange(0, -1);</script>
 			</binding>
 		</action>
 	</animation>
@@ -2647,10 +2886,10 @@
 		<object-name>nd_range</object-name>
 		<property>instrumentation/efis/inputs/range-nm</property>
 		<interpolation>
-			<entry><ind>10</ind><dep>0</dep></entry>
-			<entry><ind>20</ind><dep>45</dep></entry>
-			<entry><ind>40</ind><dep>90</dep></entry>
-			<entry><ind>80</ind><dep>135</dep></entry>
+			<entry><ind> 10</ind><dep>  0</dep></entry>
+			<entry><ind> 20</ind><dep> 45</dep></entry>
+			<entry><ind> 40</ind><dep> 90</dep></entry>
+			<entry><ind> 80</ind><dep>135</dep></entry>
 			<entry><ind>160</ind><dep>180</dep></entry>
 			<entry><ind>320</ind><dep>225</dep></entry>
 		</interpolation>
@@ -2668,7 +2907,7 @@
 			<repeatable type="bool">false</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>libraries.ctl2_func("range",1);</script>
+				<script>libraries.setNDRange(1, 1);</script>
 			</binding>
 		</action>
 		<action>
@@ -2677,7 +2916,7 @@
 			<repeatable type="bool">false</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>libraries.ctl2_func("range",-1);</script>
+				<script>libraries.setNDRange(1, -1);</script>
 			</binding>
 		</action>
 	</animation>
@@ -2686,10 +2925,10 @@
 		<object-name>nd_range_fo</object-name>
 		<property>instrumentation/efis[1]/inputs/range-nm</property>
 		<interpolation>
-			<entry><ind>10</ind><dep>0</dep></entry>
-			<entry><ind>20</ind><dep>45</dep></entry>
-			<entry><ind>40</ind><dep>90</dep></entry>
-			<entry><ind>80</ind><dep>135</dep></entry>
+			<entry><ind> 10</ind><dep>  0</dep></entry>
+			<entry><ind> 20</ind><dep> 45</dep></entry>
+			<entry><ind> 40</ind><dep> 90</dep></entry>
+			<entry><ind> 80</ind><dep>135</dep></entry>
 			<entry><ind>160</ind><dep>180</dep></entry>
 			<entry><ind>320</ind><dep>225</dep></entry>
 		</interpolation>
@@ -3026,7 +3265,7 @@
 					<value>1</value>
 				</equals>
 				<equals>
-					<property>it-autoflight/input/lat-arm</property>
+					<property>it-autoflight/output/lnav-armed</property>
 					<value>1</value>
 				</equals>
 			</or>
@@ -3510,10 +3749,8 @@
 			<button>0</button>
 			<repeatable>false</repeatable>
 			<binding>
-				<command>property-cycle</command>
-				<property>it-autoflight/input/kts-mach</property>
-				<value>0</value>
-				<value>1</value>
+				<command>nasal</command>
+				<script>libraries.APPanel.IASMach();</script>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -3530,9 +3767,7 @@
 			<repeatable>true</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>
-				libraries.mcpSPDKnbPush();
-				</script>
+				<script>libraries.APPanel.SPDPush();</script>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -3544,9 +3779,7 @@
 			<repeatable>true</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>
-				libraries.mcpSPDKnbPull();
-				</script>
+				<script>libraries.APPanel.SPDPull();</script>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -3557,42 +3790,8 @@
 			<button>3</button>
 			<repeatable>true</repeatable>
 			<binding>
-				<condition>
-					<and>
-						<equals>
-							<property>it-autoflight/input/kts-mach</property>
-							<value>0</value>
-						</equals>
-						<equals>
-							<property>it-autoflight/input/spd-managed</property>
-							<value>0</value>
-						</equals>
-					</and>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/spd-kts</property>
-				<step>1</step>
-				<min>100</min>
-				<max>350</max>
-			</binding>
-			<binding>
-				<condition>
-					<and>
-						<equals>
-							<property>it-autoflight/input/kts-mach</property>
-							<value>1</value>
-						</equals>
-						<equals>
-							<property>it-autoflight/input/spd-managed</property>
-							<value>0</value>
-						</equals>
-					</and>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/spd-mach</property>
-				<step>0.001</step>
-				<min>0.50</min>
-				<max>0.82</max>
+				<command>nasal</command>
+				<script>libraries.APPanel.SPDAdjust(1);</script>
 			</binding>
 			<binding>
 				<command>property-adjust</command>
@@ -3607,42 +3806,8 @@
 			<button>4</button>
 			<repeatable>true</repeatable>
 			<binding>
-				<condition>
-					<and>
-						<equals>
-							<property>it-autoflight/input/kts-mach</property>
-							<value>0</value>
-						</equals>
-						<equals>
-							<property>it-autoflight/input/spd-managed</property>
-							<value>0</value>
-						</equals>
-					</and>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/spd-kts</property>
-				<step>-1</step>
-				<min>100</min>
-				<max>350</max>
-			</binding>
-			<binding>
-				<condition>
-					<and>
-						<equals>
-							<property>it-autoflight/input/kts-mach</property>
-							<value>1</value>
-						</equals>
-						<equals>
-							<property>it-autoflight/input/spd-managed</property>
-							<value>0</value>
-						</equals>
-					</and>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/spd-mach</property>
-				<step>-0.001</step>
-				<min>0.50</min>
-				<max>0.82</max>
+				<command>nasal</command>
+				<script>libraries.APPanel.SPDAdjust(-1);</script>
 			</binding>
 			<binding>
 				<command>property-adjust</command>
@@ -3663,7 +3828,7 @@
 			<repeatable>false</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>libraries.mcpHDGKnbPush();</script>
+				<script>libraries.APPanel.HDGPush();</script>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -3675,7 +3840,7 @@
 			<repeatable>false</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>libraries.mcpHDGKnbPull();</script>
+				<script>libraries.APPanel.HDGPull();</script>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -3686,28 +3851,8 @@
 			<button>3</button>
 			<repeatable>true</repeatable>
 			<binding>
-				<condition>
-					<not-equals>
-						<property>it-autoflight/output/lat</property>
-						<value>0</value>
-					</not-equals>
-				</condition>
 				<command>nasal</command>
-				<script>libraries.hdgInput();</script>
-			</binding>
-			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/custom/show-hdg</property>
-						<value>1</value>
-					</equals>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/hdg</property>
-				<step>1</step>
-				<min>1</min>
-				<max>361</max>
-				<wrap>true</wrap>
+				<script>libraries.APPanel.HDGAdjust(1);</script>
 			</binding>
 			<binding>
 				<command>property-adjust</command>
@@ -3722,28 +3867,8 @@
 			<button>4</button>
 			<repeatable>true</repeatable>
 			<binding>
-				<condition>
-					<not-equals>
-						<property>it-autoflight/output/lat</property>
-						<value>0</value>
-					</not-equals>
-				</condition>
 				<command>nasal</command>
-				<script>libraries.hdgInput();</script>
-			</binding>
-			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/custom/show-hdg</property>
-						<value>1</value>
-					</equals>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/hdg</property>
-				<step>-1</step>
-				<min>1</min>
-				<max>361</max>
-				<wrap>true</wrap>
+				<script>libraries.APPanel.HDGAdjust(-1);</script>
 			</binding>
 			<binding>
 				<command>property-adjust</command>
@@ -3763,9 +3888,8 @@
 			<button>0</button>
 			<repeatable>false</repeatable>
 			<binding>
-				<command>property-assign</command>
-				<property>it-autoflight/input/lat</property>
-				<value>2</value>
+				<command>nasal</command>
+				<script>libraries.APPanel.LOCButton();</script>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -3818,9 +3942,7 @@
 			<repeatable>false</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>
-				fmgc.toggle_trkfpa();
-				</script>
+				<script>libraries.APPanel.TRKFPA();</script>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -3836,12 +3958,11 @@
 			<button>0</button>
 			<repeatable>false</repeatable>
 			<binding>
-				<command>property-toggle</command>
-				<property>it-autoflight/input/ap1</property>
-			</binding>
-			<binding>
 				<command>nasal</command>
-				<script>setprop("/sim/sounde/btn1", 1);</script>
+				<script>
+					libraries.APPanel.AP1();
+					setprop("/sim/sounde/btn1", 1);
+				</script>
 			</binding>
 		</action>
 	</animation>
@@ -3869,12 +3990,11 @@
 			<button>0</button>
 			<repeatable type="bool">false</repeatable>
 			<binding>
-				<command>property-toggle</command>
-				<property>it-autoflight/input/ap2</property>
-			</binding>
-			<binding>
 				<command>nasal</command>
-				<script>setprop("/sim/sounde/btn1", 1);</script>
+				<script>
+					libraries.APPanel.AP2();
+					setprop("/sim/sounde/btn1", 1);
+				</script>
 			</binding>
 		</action>
 	</animation>
@@ -3902,12 +4022,11 @@
 			<button>0</button>
 			<repeatable>false</repeatable>
 			<binding>
-				<command>property-toggle</command>
-				<property>it-autoflight/input/athr</property>
-			</binding>
-			<binding>
 				<command>nasal</command>
-				<script>setprop("/sim/sounde/btn1", 1);</script>
+				<script>
+					libraries.APPanel.ATHR();
+					setprop("/sim/sounde/btn1", 1);
+				</script>
 			</binding>
 		</action>
 	</animation>
@@ -3931,27 +4050,24 @@
 	<animation>
 		<type>pick</type>
 		<object-name>alt-sel</object-name>
-		<!--action>
+		<action>
 			<button>0</button>
 			<repeatable>false</repeatable>
 			<binding>
-				<command>property-assign</command>
-				<property>it-autoflight/input/vert</property>
-				<value>8</value>
+				<command>nasal</command>
+				<script>libraries.APPanel.ALTPull();</script>
 			</binding>
 			<binding>
 				<command>nasal</command>
 				<script>setprop("/sim/sounde/btn1", 1);</script>
 			</binding>
-		</action-->
+		</action>
 		<action>
-			<button>0</button>
 			<button>1</button>
 			<repeatable>false</repeatable>
 			<binding>
-				<command>property-assign</command>
-				<property>it-autoflight/input/vert</property>
-				<value>4</value>
+				<command>nasal</command>
+				<script>libraries.APPanel.ALTPush();</script>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -3962,30 +4078,8 @@
 			<button>3</button>
 			<repeatable>true</repeatable>
 			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/config/altitude-dial-mode</property>
-						<value>0</value>
-					</equals>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/alt</property>
-				<step>100</step>
-				<min>0</min>
-				<max>50000</max>
-			</binding>
-			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/config/altitude-dial-mode</property>
-						<value>1</value>
-					</equals>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/alt</property>
-				<step>1000</step>
-				<min>0</min>
-				<max>50000</max>
+				<command>nasal</command>
+				<script>libraries.APPanel.ALTAdjust(1);</script>
 			</binding>
 			<binding>
 				<command>property-adjust</command>
@@ -4000,30 +4094,8 @@
 			<button>4</button>
 			<repeatable>true</repeatable>
 			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/config/altitude-dial-mode</property>
-						<value>0</value>
-					</equals>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/alt</property>
-				<step>-100</step>
-				<min>0</min>
-				<max>50000</max>
-			</binding>
-			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/config/altitude-dial-mode</property>
-						<value>1</value>
-					</equals>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/alt</property>
-				<step>-1000</step>
-				<min>0</min>
-				<max>50000</max>
+				<command>nasal</command>
+				<script>libraries.APPanel.ALTAdjust(-1);</script>
 			</binding>
 			<binding>
 				<command>property-adjust</command>
@@ -4043,10 +4115,8 @@
 			<button>0</button>
 			<repeatable type="bool">false</repeatable>
 			<binding>
-				<command>property-cycle</command>
+				<command>property-toggle</command>
 				<property>it-autoflight/config/altitude-dial-mode</property>
-				<value>0</value>
-				<value>1</value>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -4062,48 +4132,8 @@
 			<button>0</button>
 			<repeatable>false</repeatable>
 			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/custom/trk-fpa</property>
-						<value>0</value>
-					</equals>
-				</condition>
-				<command>property-assign</command>
-				<property>it-autoflight/input/vert</property>
-				<value>1</value>
-			</binding>
-			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/custom/trk-fpa</property>
-						<value>0</value>
-					</equals>
-				</condition>
-				<command>property-assign</command>
-				<property>it-autoflight/input/vs</property>
-				<value>0</value>
-			</binding>
-			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/custom/trk-fpa</property>
-						<value>1</value>
-					</equals>
-				</condition>
-				<command>property-assign</command>
-				<property>it-autoflight/input/vert</property>
-				<value>5</value>
-			</binding>
-			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/custom/trk-fpa</property>
-						<value>1</value>
-					</equals>
-				</condition>
-				<command>property-assign</command>
-				<property>it-autoflight/input/fpa</property>
-				<value>0.0</value>
+				<command>nasal</command>
+				<script>libraries.APPanel.VSPush();</script>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -4115,13 +4145,7 @@
 			<repeatable>false</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>
-				if (getprop("/it-autoflight/custom/trk-fpa") == 0) {
-					setprop("/it-autoflight/input/vert", 1);
-				} else if (getprop("/it-autoflight/custom/trk-fpa") == 1) {
-					setprop("/it-autoflight/input/vert", 5);
-				}
-				</script>
+				<script>libraries.APPanel.VSPull();</script>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -4133,37 +4157,7 @@
 			<repeatable>true</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>
-				if (getprop("/it-autoflight/output/vert") != 1 and getprop("/it-autoflight/custom/trk-fpa") == 0) {
-					setprop("/it-autoflight/input/vert", 1);
-				} else if (getprop("/it-autoflight/output/vert") != 5 and getprop("/it-autoflight/custom/trk-fpa") == 1) {
-					setprop("/it-autoflight/input/vert", 5);
-				}
-				</script>
-			</binding>
-			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/output/vert</property>
-						<value>1</value>
-					</equals>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/vs</property>
-				<step>100</step>
-				<max>8000</max>
-			</binding>
-			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/output/vert</property>
-						<value>5</value>
-					</equals>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/fpa</property>
-				<step>0.1</step>
-				<max>20.9</max>
+				<script>libraries.APPanel.VSAdjust(1);</script>
 			</binding>
 			<binding>
 				<command>property-adjust</command>
@@ -4179,37 +4173,7 @@
 			<repeatable>true</repeatable>
 			<binding>
 				<command>nasal</command>
-				<script>
-				if (getprop("/it-autoflight/output/vert") != 1 and getprop("/it-autoflight/custom/trk-fpa") == 0) {
-					setprop("/it-autoflight/input/vert", 1);
-				} else if (getprop("/it-autoflight/output/vert") != 5 and getprop("/it-autoflight/custom/trk-fpa") == 1) {
-					setprop("/it-autoflight/input/vert", 5);
-				}
-				</script>
-			</binding>
-			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/output/vert</property>
-						<value>1</value>
-					</equals>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/vs</property>
-				<step>-100</step>
-				<min>-6000</min>
-			</binding>
-			<binding>
-				<condition>
-					<equals>
-						<property>it-autoflight/output/vert</property>
-						<value>5</value>
-					</equals>
-				</condition>
-				<command>property-adjust</command>
-				<property>it-autoflight/input/fpa</property>
-				<step>-0.1</step>
-				<min>-20.9</min>
+				<script>libraries.APPanel.VSAdjust(-1);</script>
 			</binding>
 			<binding>
 				<command>property-adjust</command>
@@ -4229,9 +4193,8 @@
 			<button>0</button>
 			<repeatable>false</repeatable>
 			<binding>
-				<command>property-assign</command>
-				<property>it-autoflight/input/vert</property>
-				<value>2</value>
+				<command>nasal</command>
+				<script>libraries.APPanel.APPRButton();</script>
 			</binding>
 			<binding>
 				<command>nasal</command>
@@ -4296,7 +4259,7 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>FlapsLever</object-name>
-		<property>controls/flight/flap-lever</property>
+		<property>fdm/jsbsim/fcs/flap-lever</property>
 		<interpolation>
 			<entry><ind>0</ind><dep> 0</dep></entry>
 			<entry><ind>1</ind><dep>14</dep></entry>
@@ -4638,6 +4601,45 @@
 	
 	<animation>
 		<type>pick</type>
+		<object-name>flood_lt_ped</object-name>
+		<action>
+			<button>0</button>
+			<button>3</button>
+			<repeatable>true</repeatable>
+			<binding>
+				<command>property-adjust</command>
+				<property>controls/lighting/ped-flood-knb</property>
+				<step>0.05</step>
+				<max>1</max>
+			</binding>
+		</action>
+		<action>
+			<button>1</button>
+			<button>4</button>
+			<repeatable>true</repeatable>
+			<binding>
+				<command>property-adjust</command>
+				<property>controls/lighting/ped-flood-knb</property>
+				<step>-0.05</step>
+				<min>0</min>
+			</binding>
+		</action>
+	</animation>
+	<animation>
+		<type>rotate</type>
+		<object-name>flood_lt_ped</object-name>
+		<property>controls/lighting/ped-flood-knb</property>
+		<interpolation>
+			<entry><ind>0</ind><dep>-129</dep></entry>
+			<entry><ind>1</ind><dep>129</dep></entry>
+		</interpolation>
+		<axis>
+			<object-name>flood_lt_ped.axis</object-name>
+		</axis>
+	</animation>
+	
+	<animation>
+		<type>pick</type>
 		<object-name>integ_lt</object-name>
 		<action>
 			<button>0</button>
@@ -4726,6 +4728,92 @@
 		<object-name>mcdu_glare</object-name>
 		<object-name>radio_glare</object-name>
 		<object-name>audio_glare</object-name>
+		<object-name>audio_int_rad.mark</object-name>
+		<object-name>vu111_glare</object-name>
+		<object-name>vu112_glare</object-name>
+		<object-name>radar_glare</object-name>
+		<object-name>radar_mode.mark</object-name>
+		<object-name>atc_glare</object-name>
+		<object-name>atc_thrt.mark</object-name>
+		<object-name>atc_sys.mark</object-name>
+		<object-name>atc_abv.mark</object-name>
+		<object-name>engine_glare</object-name>
+		<object-name>eng_mode.mark</object-name>
+		<object-name>flaps_scale</object-name>
+		<object-name>gear_lever_glare</object-name>
+		<object-name>brakes_glare</object-name>
+		<object-name>brakes_accum_psi.mark</object-name>
+		<object-name>brakes_lb_psi.mark</object-name>
+		<object-name>brakes_rb_psi.mark</object-name>
+		<object-name>clock_glare</object-name>
+		<object-name>flood_lt_main.mark</object-name>
+		<object-name>flood_lt_ped.mark</object-name>
+		<object-name>integ_lt.mark</object-name>
+		<object-name>RudderTrim.mark</object-name>
+		<object-name>CockpitDoorSwitch.mark</object-name>
+		<object-name>ecam_brt_upper.mark</object-name>
+		<object-name>ecam_brt_lower.mark</object-name>
+		<object-name>ecam_att_hdg.mark</object-name>
+		<object-name>ecam_air_data.mark</object-name>
+		<object-name>ecam_eis_dmc.mark</object-name>
+		<object-name>ecam_nd_xfr.mark</object-name>
+		<object-name>ecam_glare_up</object-name>
+		<object-name>ecam_glare_down</object-name>
+		<object-name>pfd_brt_cpt.mark</object-name>
+		<object-name>speaker_volume_cpt.mark</object-name>
+		<object-name>light_console_cpt_sw.mark</object-name>
+		<object-name>foot_warmer_cpt_sw.mark</object-name>
+		<object-name>brightness_nd_2_cpt.mark</object-name>
+		<object-name>brightness_nd_1_cpt.mark</object-name>
+		<object-name>pfd_brt_fo.mark</object-name>
+		<object-name>speaker_volume_fo.mark</object-name>
+		<object-name>light_console_fo_sw.mark</object-name>
+		<object-name>foot_warmer_fo_sw.mark</object-name>
+		<object-name>brightness_nd_2_fo.mark</object-name>
+		<object-name>brightness_nd_1_fo.mark</object-name>
+		<object-name>iesi_labels</object-name>
+		<object-name>iesi_btn_ls</object-name>
+		<object-name>iesi_btn_bugs</object-name>
+		<object-name>iesi_btn_plus</object-name>
+		<object-name>iesi_btn_minus</object-name>
+		<object-name>iesi_btn_rst</object-name>
+		<condition>
+			<not>
+				<and>
+					<greater-than>
+						<property>sim/model/lights/dome-light</property>
+						<value>0</value>
+					</greater-than>
+					<less-than>
+						<property>controls/lighting/main-panel-norm</property>
+						<value>0.25</value>
+					</less-than>
+				</and>
+			</not>
+		</condition>
+		<emission>
+			<red>1</red>
+			<green>0.725</green>
+			<blue>0.259</blue>
+			<factor-prop>controls/lighting/main-panel-norm</factor-prop>
+		</emission>
+	</animation>
+	
+	<animation>
+		<name>Panel lighting (dome)</name>
+		<type>material</type>
+		<object-name>main_panel_label</object-name>
+		<object-name>terr_on_nd_label</object-name>
+		<object-name>gear_labels</object-name>
+		<object-name>thr_quad_lts</object-name>
+		<object-name>trim_2_lts</object-name>
+		<object-name>brightness_panel_left_glare</object-name>
+		<object-name>brightness_panel_right_glare</object-name>
+		<object-name>ped_labels_1</object-name>
+		<object-name>pedestal_low_glare</object-name>
+		<object-name>mcdu_glare</object-name>
+		<object-name>radio_glare</object-name>
+		<object-name>audio_glare</object-name>
 		<object-name>audio_vhf1_glare</object-name>
 		<object-name>audio_vhf2_glare</object-name>
 		<object-name>audio_vhf3_glare</object-name>
@@ -4790,11 +4878,25 @@
 		<object-name>iesi_btn_plus</object-name>
 		<object-name>iesi_btn_minus</object-name>
 		<object-name>iesi_btn_rst</object-name>
+		<condition>
+			<and>
+				<not>
+					<greater-than>
+						<property>controls/lighting/main-panel-norm</property>
+						<value>0.25</value>
+					</greater-than>
+				</not>
+				<greater-than>
+					<property>sim/model/lights/dome-light</property>
+					<value>0</value>
+				</greater-than>
+			</and>
+		</condition>
 		<emission>
-			<red>1</red>
-			<green>0.725</green>
-			<blue>0.259</blue>
-			<factor-prop>controls/lighting/main-panel-norm</factor-prop>
+			<red>0.20</red>
+			<green>0.20</green>
+			<blue>0.20</blue>
+			<factor-prop>sim/model/lights/dome-light</factor-prop>
 		</emission>
 	</animation>
 	
@@ -4809,12 +4911,170 @@
 		<object-name>nd_mode_fo.mark</object-name>
 		<object-name>nd_range_fo.mark</object-name>
 		<object-name>hud_brt.mark</object-name>
+		<condition>
+			<not>
+				<and>
+					<greater-than>
+						<property>sim/model/lights/dome-light</property>
+						<value>0</value>
+					</greater-than>
+					<less-than>
+						<property>controls/lighting/fcu-panel-norm</property>
+						<value>0.25</value>
+					</less-than>
+				</and>
+			</not>
+		</condition>
 		<emission>
 			<red>1</red>
 			<green>0.725</green>
 			<blue>0.259</blue>
 			<factor-prop>controls/lighting/fcu-panel-norm</factor-prop>
 		</emission>
+	</animation>
+	
+	<animation>
+		<name>FCU Panel lighting (dome)</name>
+		<type>material</type>
+		<object-name>fcu_labels</object-name>
+		<object-name>fcu_labels_hud</object-name>
+		<object-name>fcu_panel_emit</object-name>
+		<object-name>nd_mode.mark</object-name>
+		<object-name>nd_range.mark</object-name>
+		<object-name>nd_mode_fo.mark</object-name>
+		<object-name>nd_range_fo.mark</object-name>
+		<object-name>hud_brt.mark</object-name>
+		<condition>
+			<and>
+				<not>
+					<greater-than>
+						<property>controls/lighting/fcu-panel-norm</property>
+						<value>0.25</value>
+					</greater-than>
+				</not>
+				<greater-than>
+					<property>sim/model/lights/dome-light</property>
+					<value>0</value>
+				</greater-than>
+			</and>
+		</condition>
+		<emission>
+			<red>0.20</red>
+			<green>0.20</green>
+			<blue>0.20</blue>
+			<factor-prop>sim/model/lights/dome-light</factor-prop>
+		</emission>
+	</animation>
+	
+	<!-- Master Warning and Caution -->
+	<animation>
+		<type>select</type>
+		<object-name>master_warning_on</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>ECAM/warnings/master-warning-flash</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+	
+	<animation>
+		<type>select</type>
+		<object-name>master_caution_on</object-name>
+		<condition>
+			<or>
+				<equals>
+					<property>controls/switches/annun-test</property>
+					<value>1</value>
+				</equals>
+				<equals>
+					<property>ECAM/warnings/master-caution-light</property>
+					<value>1</value>
+				</equals>
+			</or>
+		</condition>
+	</animation>
+	
+	<animation>
+		<type>pick</type>
+		<object-name>master_warning</object-name>
+		<object-name>master_warning_on</object-name>
+		<action>
+			<button>0</button>
+			<binding>
+				<condition>
+					<greater-than-equals>
+						<property>systems/electrical/bus/dc-ess</property>
+						<value>25</value>
+					</greater-than-equals>
+				</condition>
+				<command>property-assign</command>
+				<property>ECAM/warnings/master-warning-light</property>
+				<value>0</value>
+			</binding>
+			<binding>
+				<condition>
+					<greater-than-equals>
+						<property>systems/electrical/bus/dc-ess</property>
+						<value>25</value>
+					</greater-than-equals>
+				</condition>
+				<command>nasal</command>
+				<script>
+					if (getprop("/it-autoflight/output/ap-warning") == 1) {
+						setprop("/it-autoflight/output/ap-warning", 0);
+					}
+					if (getprop("/it-autoflight/sound/apoffsound") == 1 or getprop("/it-autoflight/sound/apoffsound2") == 1) {
+						setprop("/it-autoflight/sound/apoffsound", 0);
+						setprop("/it-autoflight/sound/apoffsound2", 0);
+					}
+				</script>
+			</binding>
+		</action>
+	</animation>
+	
+	<animation>
+		<type>pick</type>
+		<object-name>master_caution</object-name>
+		<object-name>master_caution_on</object-name>
+		<action>
+			<button>0</button>
+			<binding>
+				<condition>
+					<greater-than-equals>
+						<property>systems/electrical/bus/dc-ess</property>
+						<value>25</value>
+					</greater-than-equals>
+				</condition>
+				<command>property-assign</command>
+				<property>ECAM/warnings/master-caution-light</property>
+				<value>0</value>
+			</binding>
+			<binding>
+				<condition>
+					<greater-than-equals>
+						<property>systems/electrical/bus/dc-ess</property>
+						<value>25</value>
+					</greater-than-equals>
+				</condition>
+				<command>nasal</command>
+				<script>
+					if (getprop("/it-autoflight/output/athr-warning") == 1) {
+						setprop("/it-autoflight/output/athr-warning", 0);
+					}
+					
+					if (getprop("/sim/sound/warnings/chime") == 1) {
+						setprop("/sim/sound/warnings/chime", 0);
+					}
+				</script>
+			</binding>
+		</action>
 	</animation>
 
 	<!-- Overhead Panel-2 lighting -->
@@ -4823,11 +5083,52 @@
 		<type>material</type>
 		<object-name>ohpanel2_knob.mark</object-name>
 		<object-name>ohpanel2_illu</object-name>
+		<condition>
+			<not>
+				<and>
+					<greater-than>
+						<property>sim/model/lights/dome-light</property>
+						<value>0</value>
+					</greater-than>
+					<less-than>
+						<property>controls/lighting/overhead-panel-norm</property>
+						<value>0.25</value>
+					</less-than>
+				</and>
+			</not>
+		</condition>
 		<emission>
 			<red>1</red>
 			<green>0.824</green>
 			<blue>0.518</blue>
 			<factor-prop>controls/lighting/overhead-panel-norm</factor-prop>
+		</emission>
+	</animation>
+	
+	<animation>
+		<name>Overhead Panel-2 lighting (dome)</name>
+		<type>material</type>
+		<object-name>ohpanel2_knob.mark</object-name>
+		<object-name>ohpanel2_illu</object-name>
+		<condition>
+			<and>
+				<not>
+					<greater-than>
+						<property>controls/lighting/overhead-panel-norm</property>
+						<value>0.25</value>
+					</greater-than>
+				</not>
+				<greater-than>
+					<property>sim/model/lights/dome-light</property>
+					<value>0</value>
+				</greater-than>
+			</and>
+		</condition>
+		<emission>
+			<red>0.20</red>
+			<green>0.20</green>
+			<blue>0.20</blue>
+			<factor-prop>sim/model/lights/dome-light</factor-prop>
 		</emission>
 	</animation>
 
@@ -5009,7 +5310,7 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>SpdBrk</object-name>
-		<property>fdm/jsbsim/spoilers/speedbrake-nul</property>
+		<property>fdm/jsbsim/spoilers/main-lever</property>
 		<factor>45</factor>
 		<axis>
 			<object-name>SpdBrk.axis</object-name>
@@ -5019,7 +5320,7 @@
 	<animation>
 		<type>translate</type>
 		<object-name>SpdBrk</object-name>
-		<property>controls/flight/speedbrake-arm</property>
+		<property>fdm/jsbsim/spoilers/lever-arm</property>
 		<factor>-0.006</factor>
 		<axis>
 			<x>1</x>
@@ -5031,7 +5332,7 @@
 	<animation>
 		<type>translate</type>
 		<object-name>SpdBrk</object-name>
-		<property>controls/flight/speedbrake-arm</property>
+		<property>fdm/jsbsim/spoilers/lever-arm</property>
 		<factor>0.006</factor>
 		<axis>
 			<x>0</x>
@@ -5320,7 +5621,7 @@
 		<name>Engine 1 throttle lever</name>
 		<type>rotate</type>
 		<object-name>thr_l</object-name>
-		<property>controls/engines/engine[0]/throttle-lever</property>
+		<property>fdm/jsbsim/fcs/throttle-lever[0]</property>
 		<interpolation>
 			<entry><ind>0.00000</ind><dep> 0</dep></entry>
 			<entry><ind>0.00999</ind><dep> 0</dep></entry>
@@ -5345,7 +5646,7 @@
 		<name>Engine 1 throttle lever rev</name>
 		<type>rotate</type>
 		<object-name>thr_l</object-name>
-		<property>controls/engines/engine[0]/reverser</property>
+		<property>fdm/jsbsim/fcs/reverse-lever[0]</property>
 		<factor>-3.5</factor> 
 		<axis>
 			<object-name>trim.axis</object-name>
@@ -5355,7 +5656,7 @@
 		<name>Engine 1 throttle lever rev 2</name>
 		<type>rotate</type>
 		<object-name>thr_l</object-name>
-		<property>controls/engines/engine[0]/throttle-rev</property>
+		<property>fdm/jsbsim/fcs/reverse-thr-lever[0]</property>
 		<interpolation>
 			<entry><ind>0.00</ind><dep>  0</dep></entry>
 			<entry><ind>0.50</ind><dep>-20</dep></entry>
@@ -5395,7 +5696,7 @@
 		<name>Engine 2 throttle lever</name>
 		<type>rotate</type>
 		<object-name>thr_r</object-name>
-		<property>controls/engines/engine[1]/throttle-lever</property>
+		<property>fdm/jsbsim/fcs/throttle-lever[1]</property>
 		<interpolation>
 			<entry><ind>0.00000</ind><dep> 0</dep></entry>
 			<entry><ind>0.00999</ind><dep> 0</dep></entry>
@@ -5420,7 +5721,7 @@
 		<name>Engine 2 throttle lever rev</name>
 		<type>rotate</type>
 		<object-name>thr_r</object-name>
-		<property>controls/engines/engine[1]/reverser</property>
+		<property>fdm/jsbsim/fcs/reverse-lever[1]</property>
 		<factor>-3.5</factor> 
 		<axis>
 			<object-name>trim.axis</object-name>
@@ -5430,7 +5731,7 @@
 		<name>Engine 2 throttle lever rev 2</name>
 		<type>rotate</type>
 		<object-name>thr_r</object-name>
-		<property>controls/engines/engine[1]/throttle-rev</property>
+		<property>fdm/jsbsim/fcs/reverse-thr-lever[1]</property>
 		<interpolation>
 			<entry><ind>0.00</ind><dep> 0</dep></entry>
 			<entry><ind>0.50</ind><dep>-20</dep></entry>
@@ -5623,6 +5924,447 @@
 			<red>0.89</red>
 			<green>0.37</green>
 			<blue>0.08</blue>
+		</emission>
+	</animation>
+	
+	<animation>
+		<name>Panel lighting</name>
+		<type>material</type>
+		<object-name>ceiling</object-name>
+		<object-name>beam</object-name>
+		<object-name>beam_a</object-name>
+		<object-name>beam_f</object-name>
+		<object-name>sfl.001</object-name>
+		<object-name>sfl.011</object-name>
+		<object-name>sfl.012</object-name>
+		<object-name>sfl.014</object-name>
+		<object-name>WindowCpt</object-name>
+		<object-name>WindowFo</object-name>
+		<object-name>ohpanel2</object-name>
+		<object-name>efis_box_1</object-name>
+		<object-name>efis_box_2</object-name>
+		<object-name>efis_box_3</object-name>
+		<object-name>efis_box_4</object-name>
+		<object-name>main_panel</object-name>
+		<object-name>poly000041</object-name>
+		<object-name>side_base.002</object-name>
+		<object-name>pedals_block_capt</object-name>
+		<object-name>so.1</object-name>
+		<object-name>sts</object-name>
+		<object-name>sts.001</object-name>
+		<object-name>sts.003</object-name>
+		<object-name>sts.004</object-name>
+		<object-name>wall_1</object-name>
+		<object-name>carpet</object-name>
+		<object-name>DoorC</object-name>
+		<object-name>pedestal1</object-name>
+		<object-name>pedestal2</object-name>
+		<object-name>pedestal3</object-name>
+		<object-name>ped_footrest</object-name>
+		<object-name>pedestal_low</object-name>
+		<object-name>thr_quad</object-name>
+		<object-name>trim_1</object-name>
+		<object-name>trim_2</object-name>
+		<object-name>fcu_panel</object-name>
+		<object-name>seat1</object-name>
+		<object-name>seat4</object-name>
+		<object-name>seat6</object-name>
+		<object-name>seat7</object-name>
+		<object-name>compass_box</object-name>
+		<object-name>iesi</object-name>
+		<object-name>clock_body</object-name>
+		<object-name>clock.001</object-name>
+		<object-name>gear_lever_body</object-name>
+		<object-name>ParkBrk</object-name>
+		<object-name>RudderTrim</object-name>
+		<object-name>gravity_gear</object-name>
+		<object-name>flood_lt_main</object-name>
+		<object-name>integ_lt</object-name>
+		<object-name>flood_lt_ped</object-name>
+		<object-name>ecam_att_hdg</object-name>
+		<object-name>ecam_air_data</object-name>
+		<object-name>ecam_eis_dmc</object-name>
+		<object-name>ecam_nd_xfr</object-name>
+		<object-name>ecam_brt_upper</object-name>
+		<object-name>ecam_brt_lower</object-name>
+		<object-name>Lcutoff</object-name>
+		<object-name>Rcutoff</object-name>
+		<object-name>eng_mode</object-name>
+		<object-name>land_sw</object-name>
+		<object-name>gear_lever</object-name>
+		<object-name>pfd_brt_cpt</object-name>
+		<object-name>speaker_volume_cpt</object-name>
+		<object-name>brightness_nd_1_cpt</object-name>
+		<object-name>brightness_nd_2_cpt</object-name>
+		<object-name>pfd_brt_fo</object-name>
+		<object-name>speaker_volume_fo</object-name>
+		<object-name>brightness_nd_1_fo</object-name>
+		<object-name>brightness_nd_2_fo</object-name>
+		<object-name>light_console_cpt_sw</object-name>
+		<object-name>foot_warmer_cpt_sw</object-name>
+		<object-name>light_console_fo_sw</object-name>
+		<object-name>foot_warmer_fo_sw</object-name>
+		<object-name>pfd_nd_xfr_sw</object-name>
+		<object-name>pfd_nd_xfr_sw2</object-name>
+		<object-name>ohpanel2_knob</object-name>
+		<emission>
+			<red>0.3</red>
+			<green>0.3</green>
+			<blue>0.3</blue>
+			<factor-prop>sim/model/lights/dome-light</factor-prop>
+		</emission>
+	</animation>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/panel-flood</inherits-from>
+		<object-name>main_panel</object-name>
+		<object-name>gear_lever_body</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/gear-lever</inherits-from>
+		<object-name>gear_lever</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/panel-flood-brightness</inherits-from>
+		<object-name>brightness_panel_left_glare</object-name>
+		<object-name>brightness_panel_right_glare</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/pedestal-flood</inherits-from>
+		<object-name>pedestal_low</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/pedestal-flood-glare</inherits-from>
+		<object-name>pedestal_low_glare</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/thr-quad-flood</inherits-from>
+		<object-name>thr_quad</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/rudder-trim</inherits-from>
+		<object-name>RudderTrim</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/park-brk</inherits-from>
+		<object-name>ParkBrk</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/gravity-gear</inherits-from>
+		<object-name>gravity_gear</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/panel-flood-glare</inherits-from>
+		<object-name>main_panel_signboard</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/panel-flood-glare-right</inherits-from>
+		<object-name>gear_labels</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/pedestal-footrest</inherits-from>
+		<object-name>ped_footrest</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/pedestal-flood-flap</inherits-from>
+		<object-name>FlapsLever</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/pedestal-flood-spdbrk</inherits-from>
+		<object-name>SpdBrk</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/iesi</inherits-from>
+		<object-name>iesi</object-name>
+		<object-name>iesi_baro_knb</object-name>
+		<object-name>iesi_btn_bugs</object-name>
+		<object-name>iesi_btn_ls</object-name>
+		<object-name>iesi_btn_minus</object-name>
+		<object-name>iesi_btn_plus</object-name>
+		<object-name>iesi_btn_rst</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/clock</inherits-from>
+		<object-name>clock</object-name>
+		<object-name>clock.001</object-name>
+		<object-name>clock_body</object-name>
+	</effect>
+	
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/clock-glare</inherits-from>
+		<object-name>clock_glare</object-name>
+	</effect>
+	
+	<!-- move any objects requiring lightmap to another effect file -->
+	<effect>
+		<inherits-from>Aircraft/IDG-A32X/Models/Effects/cockpit-irradiance</inherits-from>
+		<object-name>ACP</object-name>
+		<object-name>beam</object-name>
+		<object-name>beam_a</object-name>
+		<object-name>beam_f</object-name>
+		<object-name>box</object-name>
+		<object-name>cabinet</object-name>
+		<object-name>carpet</object-name>
+		<object-name>ceiling</object-name>
+		<object-name>compass_box</object-name>
+		<object-name>DoorC</object-name>
+		<object-name>efis_box_1</object-name>
+		<object-name>efis_box_2</object-name>
+		<object-name>efis_box_2.001</object-name>
+		<object-name>efis_box_3</object-name>
+		<object-name>efis_box_4</object-name>
+		<object-name>extinguisher</object-name>
+		<object-name>cylinder30</object-name>
+		<object-name>cylinder30.002</object-name>
+		<object-name>cylinder30.003</object-name>
+		<object-name>cylinder30.004</object-name>
+		<object-name>efis_display_foil</object-name>
+		<object-name>fcu_integ_knb</object-name>
+		<object-name>hud_brt</object-name>
+		<object-name>hud_brt.mark</object-name>
+		<object-name>hud_declutter_btn</object-name>
+		<object-name>hud_norm_sw</object-name>
+		<object-name>lt_knb_1</object-name>
+		<object-name>lt_knb_1.001</object-name>
+		<object-name>master_caution</object-name>
+		<object-name>master_caution_on</object-name>
+		<object-name>master_warning</object-name>
+		<object-name>master_warning_on</object-name>
+		<object-name>metric_alt</object-name>
+		<object-name>nd_mode</object-name>
+		<object-name>nd_mode.mark</object-name>
+		<object-name>nd_mode_fo</object-name>
+		<object-name>nd_mode_fo.mark</object-name>
+		<object-name>nd_range</object-name>
+		<object-name>nd_range.mark</object-name>
+		<object-name>nd_range_fo</object-name>
+		<object-name>qnh_cpt_knb</object-name>
+		<object-name>qnh_cpt_sw</object-name>
+		<object-name>qnh_fo_knb</object-name>
+		<object-name>qnh_fo_sw</object-name>
+		<object-name>rect.003</object-name>
+		<object-name>rect.004</object-name>
+		<object-name>vor-adf-1</object-name>
+		<object-name>vor-adf-1-right</object-name>
+		<object-name>vor-adf-2</object-name>
+		<object-name>vor-adf-2-right</object-name>
+		<object-name>footrest3</object-name>
+		<object-name>footrest_cpt</object-name>
+		<object-name>footrest_cpt2</object-name>
+		<object-name>footrest_fo</object-name>
+		<object-name>footrest_fo2</object-name>
+		<object-name>gallery_l</object-name>
+		<object-name>hud</object-name>
+		<object-name>hud_1</object-name>
+		<object-name>hud_1_label</object-name>
+		<object-name>hud_2</object-name>
+		<object-name>hud_3</object-name>
+		<object-name>hud_glass</object-name>
+		<object-name>hud_screen</object-name>
+		<object-name>hud_box</object-name>
+		<object-name>hud_box_grid</object-name>
+		<object-name>hud_ceiling</object-name>
+		<object-name>lamp_flood_main</object-name>
+		<object-name>lamp_s</object-name>
+		<object-name>land_sw</object-name>
+		<object-name>level0</object-name>
+		<object-name>level0.001</object-name>
+		<object-name>level0_2</object-name>
+		<object-name>level1</object-name>
+		<object-name>level1_2</object-name>
+		<object-name>level2</object-name>
+		<object-name>level2_2</object-name>
+		<object-name>level3</object-name>
+		<object-name>level3_2</object-name>
+		<object-name>light_console_cpt_sw</object-name>
+		<object-name>light_console_cpt_sw.axis</object-name>
+		<object-name>light_console_fo_sw</object-name>
+		<object-name>light_console_fo_sw.axis</object-name>
+		<object-name>LRudderPedalL</object-name>
+		<object-name>LRudderPedalR</object-name>
+		<object-name>Main-Panel</object-name>
+		<object-name>abs_low</object-name>
+		<object-name>abs_low_on</object-name>
+		<object-name>abs_max</object-name>
+		<object-name>abs_max_on</object-name>
+		<object-name>abs_med</object-name>
+		<object-name>abs_med_on</object-name>
+		<object-name>brightness_nd_1_cpt</object-name>
+		<object-name>brightness_nd_1_fo</object-name>
+		<object-name>brightness_nd_1_fo.mark</object-name>
+		<object-name>brightness_nd_2_cpt</object-name>
+		<object-name>brightness_nd_2_cpt.mark</object-name>
+		<object-name>brightness_nd_2_fo</object-name>
+		<object-name>brightness_nd_2_fo.mark</object-name>
+		<object-name>brightness_panel_emit</object-name>
+		<object-name>brk_fan</object-name>
+		<object-name>dec_low_on</object-name>
+		<object-name>dec_max_on</object-name>
+		<object-name>dec_med_on</object-name>
+		<object-name>foot_warmer_cpt_sw</object-name>
+		<object-name>foot_warmer_cpt_sw.mark</object-name>
+		<object-name>foot_warmer_fo_sw</object-name>
+		<object-name>foot_warmer_fo_sw.mark</object-name>
+		<object-name>gear_lever_slot</object-name>
+		<object-name>gpws_gs_sw</object-name>
+		<object-name>iesi_labels</object-name>
+		<object-name>iesi_screen</object-name>
+		<object-name>lgear</object-name>
+		<object-name>lgear_down</object-name>
+		<object-name>lgear_unlk</object-name>
+		<object-name>main_panel_box</object-name>
+		<object-name>ngear</object-name>
+		<object-name>ngear_down</object-name>
+		<object-name>ngear_unlk</object-name>
+		<object-name>pfd_brt_cpt</object-name>
+		<object-name>pfd_brt_cpt.mark</object-name>
+		<object-name>pfd_brt_fo</object-name>
+		<object-name>pfd_brt_fo.mark</object-name>
+		<object-name>pfd_nd_xfr_sw</object-name>
+		<object-name>pfd_nd_xfr_sw2</object-name>
+		<object-name>rect</object-name>
+		<object-name>rgear</object-name>
+		<object-name>rgear_down</object-name>
+		<object-name>rgear_unlk</object-name>
+		<object-name>speaker_volume_cpt</object-name>
+		<object-name>speaker_volume_cpt.mark</object-name>
+		<object-name>speaker_volume_fo</object-name>
+		<object-name>speaker_volume_fo.mark</object-name>
+		<object-name>switch_bas</object-name>
+		<object-name>ohpanel2</object-name>
+		<object-name>ohpanel2_knob</object-name>
+		<object-name>ohpanel2_knob.mark</object-name>
+		<object-name>pedal_adjust</object-name>
+		<object-name>pedals_block_capt</object-name>
+		<object-name>pedals_indicator_1</object-name>
+		<object-name>Pedestal-Low</object-name>
+		<object-name>CockpitDoorFault</object-name>
+		<object-name>CockpitDoorOpen</object-name>
+		<object-name>CockpitDoorSwitch</object-name>
+		<object-name>CockpitDoorSwitch.mark</object-name>
+		<object-name>CockpitDoorVideoButton</object-name>
+		<object-name>gravity_gear</object-name>
+		<object-name>ParkBrk</object-name>
+		<object-name>RudderTrim</object-name>
+		<object-name>RudderTrim.mark</object-name>
+		<object-name>RudderTrimReset</object-name>
+		<object-name>pedestal1</object-name>
+		<object-name>pedestal3</object-name>
+		<object-name>pedestal_map_case</object-name>
+		<object-name>phone</object-name>
+		<object-name>phone2</object-name>
+		<object-name>pl</object-name>
+		<object-name>poly000041</object-name>
+		<object-name>RMP</object-name>
+		<object-name>RRudderPedalL</object-name>
+		<object-name>RRudderPedalR</object-name>
+		<object-name>screws</object-name>
+		<object-name>Seat</object-name>
+		<object-name>seat0</object-name>
+		<object-name>seat1</object-name>
+		<object-name>seat2</object-name>
+		<object-name>seat4</object-name>
+		<object-name>seat6</object-name>
+		<object-name>seat7</object-name>
+		<object-name>seat8</object-name>
+		<object-name>seat_belt</object-name>
+		<object-name>seat_label</object-name>
+		<object-name>seat_label.001</object-name>
+		<object-name>seat3</object-name>
+		<object-name>seat3.001</object-name>
+		<object-name>seat4.001</object-name>
+		<object-name>seat4.002</object-name>
+		<object-name>sfl.001</object-name>
+		<object-name>sfl.002</object-name>
+		<object-name>sfl.006</object-name>
+		<object-name>sfl.010</object-name>
+		<object-name>sfl.011</object-name>
+		<object-name>sfl.012</object-name>
+		<object-name>sfl.013</object-name>
+		<object-name>sfl.014</object-name>
+		<object-name>side_base.002</object-name>
+		<object-name>side_base_lamp</object-name>
+		<object-name>sidestick_1</object-name>
+		<object-name>sidestick_1.axis.002</object-name>
+		<object-name>sidestick_2</object-name>
+		<object-name>so.000</object-name>
+		<object-name>so.1</object-name>
+		<object-name>so.2</object-name>
+		<object-name>sphere</object-name>
+		<object-name>sphere.007</object-name>
+		<object-name>sts</object-name>
+		<object-name>sts.001</object-name>
+		<object-name>sts.003</object-name>
+		<object-name>sts.004</object-name>
+		<object-name>sts.006</object-name>
+		<object-name>sts.007</object-name>
+		<object-name>thr_l</object-name>
+		<object-name>rev_l</object-name>
+		<object-name>thr_l_body</object-name>
+		<object-name>thr_l_button</object-name>
+		<object-name>thr_l_screw</object-name>
+		<object-name>thr_quad</object-name>
+		<object-name>thr_quad_lts</object-name>
+		<object-name>thr_r</object-name>
+		<object-name>rev_r</object-name>
+		<object-name>thr_button</object-name>
+		<object-name>thr_r_body</object-name>
+		<object-name>thr_r_screw</object-name>
+		<object-name>tiller</object-name>
+		<object-name>tillerFo</object-name>
+		<object-name>tray0-fo</object-name>
+		<object-name>tray1-cpt</object-name>
+		<object-name>tray0-cpt</object-name>
+		<object-name>tray1-fo</object-name>
+		<object-name>tray2-cpt</object-name>
+		<object-name>tray2-fo</object-name>
+		<object-name>trim_wheel</object-name>
+		<object-name>trim_1</object-name>
+		<object-name>trim_2</object-name>
+		<object-name>trim_2_lts</object-name>
+		<object-name>trray_slide</object-name>
+		<object-name>visor_cpt</object-name>
+		<object-name>visor_fo</object-name>
+		<object-name>visor_glass_cpt</object-name>
+		<object-name>visor_glass_fo</object-name>
+		<object-name>wall_1</object-name>
+		<object-name>wall_2</object-name>
+		<object-name>window_frame</object-name>
+		<object-name>HeadsetCpt</object-name>
+		<object-name>WindowGlassCpt</object-name>
+		<object-name>WindowOpenerCpt</object-name>
+		<object-name>WindowFo</object-name>
+		<object-name>HeadsetFo</object-name>
+		<object-name>WindowGlassFo</object-name>
+		<object-name>WindowOpenerFo</object-name>
+		<object-name>WX</object-name>
+	</effect>
+   
+	<animation>
+		<name>Panel lighting</name>
+		<type>material</type>
+		<object-name>cpit_lamp_cpt</object-name>
+		<object-name>cpit_lamp_fo</object-name>
+		<emission>
+			<red>0.8</red>
+			<green>0.8</green>
+			<blue>0.8</blue>
+			<factor-prop>sim/model/lights/dome-light</factor-prop>
 		</emission>
 	</animation>
 

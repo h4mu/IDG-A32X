@@ -1,9 +1,6 @@
 # A3XX PFD
-# Joshua Davidson (it0uchpods)
 
-##############################################
-# Copyright (c) Joshua Davidson (it0uchpods) #
-##############################################
+# Copyright (c) 2019 Joshua Davidson (it0uchpods)
 
 var PFD_1 = nil;
 var PFD_2 = nil;
@@ -22,6 +19,7 @@ var ASItrgtdiff = 0;
 var ASImax = 0;
 var ASItrend = 0;
 var altTens = 0;
+var altPolarity = "";
 
 # Fetch nodes:
 var state1 = props.globals.getNode("/systems/thrust/state1", 1);
@@ -90,7 +88,7 @@ var at_input_spd_kts = props.globals.getNode("/it-autoflight/input/spd-kts", 1);
 var fd_roll = props.globals.getNode("/it-autoflight/fd/roll-bar", 1);
 var fd_pitch = props.globals.getNode("/it-autoflight/fd/pitch-bar", 1);
 var decision = props.globals.getNode("/instrumentation/mk-viii/inputs/arinc429/decision-height", 1);
-var skid_slip = props.globals.getNode("/instrumentation/slip-skid-ball/indicated-slip-skid", 1);
+var slip_skid = props.globals.getNode("/instrumentation/pfd/slip-skid", 1);
 var FMGCphase = props.globals.getNode("/FMGC/status/phase", 1);
 var loc = props.globals.getNode("/instrumentation/nav[0]/heading-needle-deflection-norm", 1);
 var gs = props.globals.getNode("/instrumentation/nav[0]/gs-needle-deflection-norm", 1);
@@ -246,7 +244,7 @@ var canvas_PFD_base = {
 		if (acconfig_mismatch.getValue() == "0x000") {
 			PFD_1_mismatch.page.hide();
 			PFD_2_mismatch.page.hide();
-			if (acess.getValue() >= 110 and du1_lgt.getValue() > 0) {
+			if (acess.getValue() >= 110 and du1_lgt.getValue() > 0.01) {
 				if (du1_test_time.getValue() + du1_test_amount.getValue() >= elapsedtime_act and cpt_du_xfr.getValue() != 1) {
 					PFD_1_test.update();
 					updateL = 0;
@@ -269,7 +267,7 @@ var canvas_PFD_base = {
 				PFD_1_test.page.hide();
 				PFD_1.page.hide();
 			}
-			if (ac2.getValue() >= 110 and du6_lgt.getValue() > 0) {
+			if (ac2.getValue() >= 110 and du6_lgt.getValue() > 0.01) {
 				if (du6_test_time.getValue() + du6_test_amount.getValue() >= elapsedtime_act and fo_du_xfr.getValue() != 1) {
 					PFD_2_test.update();
 					updateR = 0;
@@ -452,7 +450,6 @@ var canvas_PFD_base = {
 		roll_mode_armed_act = roll_mode_armed.getValue();
 		fbw_curlaw = fbw_law.getValue();
 		me["FMA_combined"].setText(sprintf("%s", pitch_mode_act));
-		
 		
 		if (pitch_mode_act == "LAND" or pitch_mode_act == "FLARE" or pitch_mode_act == "ROLL OUT") {
 			me["FMA_pitch"].hide();
@@ -735,7 +732,7 @@ var canvas_PFD_base = {
 		me.AI_horizon_ground_rot.setRotation(-roll_cur * D2R, me["AI_center"].getCenter());
 		me.AI_horizon_sky_rot.setRotation(-roll_cur * D2R, me["AI_center"].getCenter());
 		
-		me["AI_slipskid"].setTranslation(math.clamp(skid_slip.getValue(), -7, 7) * -15, 0);
+		me["AI_slipskid"].setTranslation(math.clamp(slip_skid.getValue(), -15, 15) * 7, 0);
 		me["AI_bank"].setRotation(-roll_cur * D2R);
 		
 		if (fbw_law.getValue() == 0) {
@@ -810,7 +807,12 @@ var canvas_PFD_base = {
 		me["ALT_two"].setText(sprintf("%03d", abs(me.middleAltText-5)));
 		me["ALT_one"].setText(sprintf("%03d", abs(me.middleAltText-10)));
 		
-		me["ALT_digits"].setText(sprintf("%s", altitude_pfd.getValue()));
+		if (altitude.getValue() < 0) {
+			altPolarity = "-";
+		} else {
+			altPolarity = "";
+		}
+		me["ALT_digits"].setText(sprintf("%s%d", altPolarity, altitude_pfd.getValue()));
 		altTens = num(right(sprintf("%02d", altitude.getValue()), 2));
 		me["ALT_tens"].setTranslation(0, altTens * 1.392);
 		
